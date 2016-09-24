@@ -11,3 +11,6 @@ CRIT_PER_AGIL = 1 			--每点敏捷增加的暴击值
 BASEEXP_LEVEL_NEED = 10 	--升级需要的基础经验
 ADJEXP_LEVEL_NEED = 3 		--升级调整经验(adjexp*level)
 BLENGTH=100					--战斗回合距离值
+
+---常量
+NATT = "NATT" 

@@ -19,6 +19,7 @@ local pwd = string.sub(io.popen("pwd"):read("*a"),1,-2)
 package.path = package.path ..";" .. pwd .. "/" .."?.lua"
 local fight = require("fight")
 local base_mt = require("base")
+require("skill")
 
 --解析加密配置
 function academy:getconfig(filename)
@@ -111,10 +112,14 @@ end
 --战斗是宠物小精灵xy
 function academy:fight()
 	local battleturn = fight:battlespeed(self.role,self.monster)
+	--如果是真，则让玩家采取行动，否则怪物AI
 	if battleturn == true  then 
 		self:actlist()
 		--local act = self:getinput()
 		--print(act)
+		print("普攻","怪物生命",self.role.natt,self.monster.hp)
+		self.role:castskill(doublehurt,self.monster)
+		print(self.monster.hp)
 	else
 		print(self.monster.bpos)
 	end
@@ -150,9 +155,9 @@ function academy:startgame()
 ]]
 	print(welcome)
 	self:createrole()
-	self.monster = self:unitborn({bspd = 99})
+	self.monster = self:unitborn({bspd = 10})
+	print("战斗速度",self.monster.bspd,self.role.bspd)
 	self:fight()
-print(self.monster.bspd,self.monster.bpos,self.role.bspd,self.role.bpos)
 end
 
 academy:startgame()

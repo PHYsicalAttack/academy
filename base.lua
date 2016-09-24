@@ -44,6 +44,13 @@ function base_mt:actshow()
 
 end
 
+function base_mt:castskill(skill,target,arg)
+	local caster = self
+	local target = target
+	local arg = arg
+	skill(caster,target,arg)
+end
+
 --add skill
 function base_mt:addskill(skill) 
 	self.skill[#self.skill+1] = {}
