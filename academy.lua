@@ -17,9 +17,11 @@ BLENGTH=100					--战斗回合距离值
 
 local pwd = string.sub(io.popen("pwd"):read("*a"),1,-2) 
 package.path = package.path ..";" .. pwd .. "/" .."?.lua"
+require("tuning")
+require("debugfunc")
+local skill = require("skill")
 local fight = require("fight")
 local base_mt = require("base")
-require("skill")
 
 --解析加密配置
 function academy:getconfig(filename)
@@ -87,8 +89,8 @@ end
 
 --创建角色
 function academy:createrole()
-	print(string.rep("\n",1000))
-	os.execute("clear")
+	--print(string.rep("\n",1000))
+	--os.execute("clear")
 	local attr = 15
 	print([[请分配熟悉点至体质、精神、敏捷：
 每一点体质增加10点生命，1点普通攻击，1点普通防御
@@ -97,15 +99,15 @@ function academy:createrole()
 	--这儿是属性分配读取
 	local con,spir,agil = 5,5,5
 	--随机获得成长,升一级获得5点属性
-	local max_attr_gain = 5
 	print([[roll随机成长，属性成长总和不能大于5，计算属性值时只会计算整数部分。]])
 	local conplv,spirplv,agilplv
 	repeat
 		conplv = self:decfloor(math.random()*5)
 		spirplv = self:decfloor(math.random()*5)
 		agilplv = self:decfloor(math.random()*5)
-	until conplv+spirplv+agilplv <= max_attr_gain
-	self.roleattr = {con=con ,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,level=1}
+	until conplv+spirplv+agilplv <= MAX_ATTR_GAIN
+	--保存生成的属性
+	self.roleattr = {con=con ,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,level=1,name ="role"}
 	self.role = self:unitborn(self.roleattr)
 end 
 
@@ -118,7 +120,8 @@ function academy:fight()
 		--local act = self:getinput()
 		--print(act)
 		print("普攻","怪物生命",self.role.natt,self.monster.hp)
-		self.role:castskill(doublehurt,self.monster)
+		self.role:addskill("重击")
+		self.role:castskill("重击",self.monster)
 		print(self.monster.hp)
 	else
 		print(self.monster.bpos)
@@ -155,7 +158,8 @@ function academy:startgame()
 ]]
 	print(welcome)
 	self:createrole()
-	self.monster = self:unitborn({bspd = 10})
+	local monster = {name = "monster",bspd = 10,justice = 0}
+	self.monster = self:unitborn(monster)
 	print("战斗速度",self.monster.bspd,self.role.bspd)
 	self:fight()
 end
