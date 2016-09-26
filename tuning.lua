@@ -14,6 +14,7 @@ ADJEXP_LEVEL_NEED = 3 		--升级调整经验(adjexp*level)
 BLENGTH = 100				--战斗回合距离值
 MAX_ATTR_GAIN = 5   		--基础属性成长之和最大值
 MAX_SKILL_NUM = 4 			--能获得的最大技能数
+CRIT_MUTI = 2 				--暴击倍数
 ---常量
 NATT = "NATT" 
 SATT = "SATT"
@@ -22,4 +23,6 @@ SATT = "SATT"
 --异常提示
 ERROR_MAX_SKILL_NUM = "你已拥有太多技能"
 ERROR_DELETE_SKILL	="删除技能失败"
-ERROR_SAME_SKILL = "你已拥有改技能"
+ERROR_SAME_SKILL = "你已拥有这个技能"
+ERROR_UNKNOW_DMGTYPE = "未知伤害类型"
+ERROR_NOT_ENOUGH_MP = "魔法值不足"

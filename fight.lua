@@ -1,6 +1,5 @@
 --这个是战斗相关控制
 local fight={}
-require("tuning")
 function fight:battlespeed(role,monster)
 	while role.bpos<BLENGTH and monster.bpos <BLENGTH do 
 		role.bpos = role.bpos + role.bspd

@@ -1,7 +1,7 @@
 academy ={}
 --全局设置
 math.randomseed(os.time())
-HP_PER_CON=10 				--每点体质增加hp值
+--[[HP_PER_CON=10 				--每点体质增加hp值
 NATT_PER_CON=1 				--每点体质增加普攻值
 NDEF_PER_CON =1 			--每点体质增加普防值
 MP_PER_SPIR = 5 			--每点精神增加mp值
@@ -13,13 +13,14 @@ MISS_PER_AGIL = 1 			--每点敏捷增加闪避值
 CRIT_PER_AGIL = 1 			--每点敏捷增加的暴击值
 BASEEXP_LEVEL_NEED = 10 	--升级需要的基础经验
 ADJEXP_LEVEL_NEED = 3 		--升级调整经验(adjexp*level)
-BLENGTH=100					--战斗回合距离值
+BLENGTH=100					--战斗回合距离值]]
 
 local pwd = string.sub(io.popen("pwd"):read("*a"),1,-2) 
 package.path = package.path ..";" .. pwd .. "/" .."?.lua"
 require("tuning")
 require("debugfunc")
-local skill = require("skill")
+
+skill = require("skill")   						--skill前面不能加local不然在base中会访问不到,要么在base中重新require.
 local fight = require("fight")
 local base_mt = require("base")
 
@@ -120,8 +121,8 @@ function academy:fight()
 		--local act = self:getinput()
 		--print(act)
 		print("普攻","怪物生命",self.role.natt,self.monster.hp)
-		self.role:addskill("重击")
-		self.role:castskill("重击",self.monster)
+		self.role:addskill("超电磁炮")
+		self.role:castskill("超电磁炮",self.monster)
 		print(self.monster.hp)
 	else
 		print(self.monster.bpos)
@@ -130,7 +131,22 @@ end
 
 --剧情播放
 function academy:story()
-	
+	if xx return self:story()
+	else 
+		return fight 
+	else
+		return pass 
+
+end
+
+--进入关卡
+function academy:level(level)
+	--生成基本信息
+
+	if xx
+	--播放剧情，如果达到xx要求，则可以免战斗通关，如果没有达到则开始战斗，如果战斗胜利则开始下一关，否则gg
+
+
 end
 
 function academy:actlist()

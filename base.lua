@@ -1,5 +1,5 @@
 --角色方法表
-local base_mt = {level=0,hp=200,mp=50,natt=20,ndef=0,sdef=0,bpos=0,bspd=1,accu=0,miss=0,crit=0,skill={},buffround={},name ="name",justice=0}
+local base_mt = {level=0,hp=200,mp=50,natt=20,ndef=0,sdef=0,bpos=0,bspd=0,accu=0,miss=0,crit=0,skill={},buffround={},name ="name",justice=0}
 base_mt.__index = base_mt
 
 --获取某项
@@ -17,8 +17,25 @@ end
 
 --受到伤害
 function base_mt:applydmg(t_dmg)
-	local attacker,damage = table.unpack(t_dmg)
-	self.hp = self.hp - damage
+	local attacker,damage,damagetype = table.unpack(t_dmg)
+	local truedmg
+	if damagetype == NATT then 
+		--普攻会计算闪避
+		if math.random(100) <=self.miss then
+			truedmg = 0
+		else 
+			truedmg = damage - self.ndef
+		end
+		self.hp = self.hp - truedmg
+		return true
+	elseif damagetype == SATT then 
+		truedmg = damage - self.sdef
+		self.hp = self.hp - truedmg
+		return true
+	else 
+		print(ERROR_UNKNOW_DMGTYPE)
+		return false
+	end
 end
 
 --是否死亡
@@ -30,9 +47,6 @@ function base_mt:isdie()
 	end
 end
 
-function base_mt:castability()
-	
-end
 --升级
 function base_mt:upgrade(grade)
 	print("shengji ")
@@ -47,13 +61,22 @@ end
 --释放技能
 function base_mt:castskill(skillname,target,arg)
 	local skillfunc
+	local cost 
 	for i,v in ipairs(self.skill) do 
 		if v.name == skillname then 
 			skillfunc = v.func
+			cost = v.cost
 			break
 		end
 	end
+	--如果蓝量不足则不能释放
+	print(self.mp,cost)
+	if self.mp < cost then 
+		print(ERROR_NOT_ENOUGH_MP)
+		return false
+	end 
 	skillfunc(self,target,arg)
+	return true
 end
 
 --获得技能
