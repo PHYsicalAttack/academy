@@ -26,17 +26,18 @@ local base_mt = require("base")
 
 --解析加密配置
 function academy:getconfig(filename)
-	local filename = filename or ""
+	local filename = filename
 	local pwd = string.sub(io.popen("pwd"):read("*a"),1,-2)
 	local codestr = io.open(pwd .. "/" .. filename ..".config"):read("*a")
 	local code =""
 	for p,c in utf8.codes(codestr) do
-		code = code .. utf8.char(c-13)
+		--code = code .. utf8.char(c-13)
+		code = code .. utf8.char(c)
 	end
 	return load(code)()
 end
 
---获取输入
+--获取输入(游戏不给输入其他文字,只给输入数字)
 function academy:getinput(isstr)
 	local input
 	if not isstr then
@@ -91,7 +92,7 @@ end
 --创建角色
 function academy:createrole()
 	--print(string.rep("\n",1000))
-	--os.execute("clear")
+	os.execute("clear")
 	local attr = 15
 	print([[请分配熟悉点至体质、精神、敏捷：
 每一点体质增加10点生命，1点普通攻击，1点普通防御
@@ -107,9 +108,16 @@ function academy:createrole()
 		spirplv = self:decfloor(math.random()*5)
 		agilplv = self:decfloor(math.random()*5)
 	until conplv+spirplv+agilplv <= MAX_ATTR_GAIN
+	--获得角色名
+	local name = "role"
+	--获得角色初始阵营值
+	local law = 5 				--虚假阵营值秩序,由各种剧情选择改变
+	local good = 5 				--虚假阵营值善良,由各种剧情选择改变
 	--保存生成的属性
-	self.roleattr = {con=con ,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,level=1,name ="role"}
+	self.roleattr = {con=con ,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,level=1,name=name,law=law,good=good}
 	self.role = self:unitborn(self.roleattr)
+	self.role:addskill("普通攻击")
+	return self:levelstart(1)
 end 
 
 --战斗是宠物小精灵xy
@@ -117,11 +125,11 @@ function academy:fight()
 	local battleturn = fight:battlespeed(self.role,self.monster)
 	--如果是真，则让玩家采取行动，否则怪物AI
 	if battleturn == true  then 
+		self.role:addskill("超电磁炮")
 		self:actlist()
 		--local act = self:getinput()
 		--print(act)
 		print("普攻","怪物生命",self.role.natt,self.monster.hp)
-		self.role:addskill("超电磁炮")
 		self.role:castskill("超电磁炮",self.monster)
 		print(self.monster.hp)
 	else
@@ -130,54 +138,65 @@ function academy:fight()
 end
 
 --剧情播放
-function academy:story()
-	if xx return self:story()
+function academy:storyplay(story_t,id)
+	--在剧情里面
+	local story = story_t
+	local id = id or 1
+	if id > #story then 
+		return STORY_RESULT_PASS
+	elseif story.func(self) then 
+		--开始展示剧情、读取选择、改变阵营值
+			--代码
+		-----
+		return self:storyplay(story,id+1)
 	else 
-		return fight 
-	else
-		return pass 
-
+		return STORY_RESULT_FIGHT
+	end
 end
 
 --进入关卡
-function academy:level(level)
+function academy:levelstart(levelid)
 	--生成基本信息
-
-	if xx
-	--播放剧情，如果达到xx要求，则可以免战斗通关，如果没有达到则开始战斗，如果战斗胜利则开始下一关，否则gg
-
-
+	local level = self.level[levelid]				
+	self.role = self:unitborn(self.roleattr)
+	self.monster = self:unitborn(level.monster)
+	self.story = level.story 
+	local story_result = self:storyplay(self.story)
+	if story_result == STORY_RESULT_PASS then 
+		return self:levelstart(levelid+1)
+	elseif story_result == STORY_RESULT_FIGHT then 
+		return self:fight()
+	end
 end
 
 function academy:actlist()
 	--将攻击、技能存在一个表里面
-	print([[
-1、普攻
-2、技能1
-3、技能2
-]])
+	local skill = self.role.skill
+	local skillinfo = {}
+	for i = 1,MAX_SKILL_NUM do 
+		if skill[i] then 
+			skillinfo[(i-1)*2+1] = skill[i].name
+			skillinfo[(i-1)*2+2]= skill[i].desc
+		else
+			skillinfo[(i-1)*2+1] = ""
+			skillinfo[(i-1)*2+2] = "" 
+		end
+	end 
+	local output =[[
+① %s %s
+② %s %s
+③ %s %s
+④ %s %s
+⑤ %s %s
+⑥ %s %s]]
+	print(string.format(output,table.unpack(skillinfo)))
 end
-
-
-
 
 --游戏
 function academy:startgame()
-	local welcome =[[
-
-欢迎试玩【RE:学园都市】,嘿嘿嘿!
-游戏须知:
-1、加点和技能左右战斗的胜利！
-2、行为选择尤其重要，左右故事结局~
-3、同一时间只能获得一个有益和一个负面状态。
-
-]]
-	print(welcome)
+	print(WELCOME)
+	self.level = self:getconfig("academy")
 	self:createrole()
-	local monster = {name = "monster",bspd = 10,justice = 0}
-	self.monster = self:unitborn(monster)
-	print("战斗速度",self.monster.bspd,self.role.bspd)
-	self:fight()
 end
 
 academy:startgame()

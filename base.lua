@@ -1,5 +1,5 @@
 --角色方法表
-local base_mt = {level=0,hp=200,mp=50,natt=20,ndef=0,sdef=0,bpos=0,bspd=0,accu=0,miss=0,crit=0,skill={},buffround={},name ="name",justice=0}
+local base_mt = {level=0,hp=200,mp=50,natt=20,ndef=0,sdef=0,bpos=0,bspd=0,accu=0,miss=0,crit=0,skill={},buffround={},name ="name",law=0,good=0}
 base_mt.__index = base_mt
 
 --获取某项
@@ -70,7 +70,6 @@ function base_mt:castskill(skillname,target,arg)
 		end
 	end
 	--如果蓝量不足则不能释放
-	print(self.mp,cost)
 	if self.mp < cost then 
 		print(ERROR_NOT_ENOUGH_MP)
 		return false
@@ -100,15 +99,22 @@ end
 
 --删除技能
 function base_mt:removeskill(skillname)
+	--不能删除掉普攻技能
+	if skillname == SKILL_NATT_NAME then 
+		print(ERROR_DELETE_SKILL_NORM)
+		return false
+	end 
+	--正常删除技能
 	for i,v in ipairs(self.skill) do 
 		if v.name == skillname then 
 			self.skill[i] = nil 
 			return true
-		else
-			print(ERROR_DELETE_SKILL)
-			return false
 		end
 	end
+	--或许有其他异常
+	print(ERROR_DELETE_SKILL)
+	return false
+
 end
 
 --add modifier
