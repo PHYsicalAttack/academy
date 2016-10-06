@@ -70,7 +70,9 @@ end
 
 --单位生成
 function academy:unitborn(t)
-	unit = t or {}
+	local unit = t or {}
+	--单独将skill表等插入unit不从元表继承那个skill空表。
+	unit.skill = unit.skill or {}
 	setmetatable(unit,base_mt)
 	--这儿写一些熟悉计算的公式，怪物的话应该没有基础属性，并且lv=0,如果不是1则认为是角色。
 	--另外没有的属性会从元表继承
@@ -88,6 +90,7 @@ function academy:unitborn(t)
 	end
 	return unit
 end
+
 
 --创建角色
 function academy:createrole()
@@ -114,81 +117,145 @@ function academy:createrole()
 	local law = 5 				--虚假阵营值秩序,由各种剧情选择改变
 	local good = 5 				--虚假阵营值善良,由各种剧情选择改变
 	--保存生成的属性
-	self.roleattr = {con=con ,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,level=1,name=name,law=law,good=good}
+	self.roleattr = {con=con,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,level=1,name=name,law=law,good=good}
 	self.role = self:unitborn(self.roleattr)
-	self.role:addskill("普通攻击")
+	--生成角色时增加普通攻击
+	self.role:addskill(SKILL_NATT_NAME)
 	return self:levelstart(1)
 end 
 
+--每次进入(退出?)关卡后刷新角色属性,并去掉所有modifier
+function academy:rolefresh()
+	-- body
+end
+
 --战斗是宠物小精灵xy
 function academy:fight()
-	local battleturn = fight:battlespeed(self.role,self.monster)
+	if self.role:isdie() then 			--玩家死亡
+		return FIGHT_RESULT_LOSE
+	elseif self.monster:isdie() then 
+		return FIGHT_RESULT_WIN
+	end
+
 	--如果是真，则让玩家采取行动，否则怪物AI
+	local battleturn = fight:battlespeed(self.role,self.monster)
 	if battleturn == true  then 
 		self.role:addskill("超电磁炮")
+		self.monster:addskill("矢量操作:反射")
+		--self.monster:castskill("矢量操作:反射")
+		print("角色生命","怪物生命")
+		print(self.role.hp,self.monster.hp)
 		self:actlist()
 		--local act = self:getinput()
 		--print(act)
-		print("普攻","怪物生命",self.role.natt,self.monster.hp)
 		self.role:castskill("超电磁炮",self.monster)
-		print(self.monster.hp)
+		--self.role:castskill("普通攻击",self.monster)
+		print(self.role.hp,self.monster.hp)
 	else
 		print(self.monster.bpos)
 	end
+	return self:fight() 
 end
 
 --剧情播放
 function academy:storyplay(story_t,id)
+	do 
+	return STORY_RESULT_FIGHT
+	end
 	--在剧情里面
 	local story = story_t
 	local id = id or 1
-	if id > #story then 
+	if id > #story then
+		print(story.pass)
 		return STORY_RESULT_PASS
-	elseif story.func(self) then 
-		--开始展示剧情、读取选择、改变阵营值
-			--代码
-		-----
+	elseif id <2 or story.func(self) then 				--第一次不进行判断 
+		--显示怪物说的话,现将所有对话都存进一个表
+		local dialog = {}
+		for i,v in ipairs(story[id]) do 
+			if type(v) == "string" then 
+				dialog[#dialog+1] = v 
+			elseif  type(v) == "table" then 
+				dialog[#dialog+1] = SERIAL[i-1] ..string.char(SPACE) ..  v[1]
+			else
+				print(ERROR_INVALID_CONFIG)
+			end
+		end
+		--开始逐步显示dialog,先显示怪物说的话,稍等后再显示选择
+		print(dialog[1])
+		self:delay(0.7)
+		for i,v in ipairs(dialog) do 
+			if i >1 then 
+				print(v)
+			end
+		end
+		--显示完毕，获取玩家输入，计算
+		local tem 
+		repeat 
+			if tem then 
+				print(ERROR_INPUT_OUTOF_RANGE)
+			end
+			tem = self:getinput()
+		until story[id][tem+1]
+		local choice = tem + 1 				--实际内容是输入+1表中的值
+		local change_law,change_good = story[id][choice][2],story[id][choice][3]
+		self.role.law = self.role.law + change_law
+		self.role.good = self.role.good + change_good
+		--符合条件继续进行下一个
 		return self:storyplay(story,id+1)
 	else 
+		print(story.fight)
 		return STORY_RESULT_FIGHT
 	end
 end
 
+--怪物
+
 --进入关卡
 function academy:levelstart(levelid)
 	--生成基本信息
-	local level = self.level[levelid]				
-	self.role = self:unitborn(self.roleattr)
+	local level = self.level[levelid]		
+	local level_title = string.format("第%d关",levelid)
+	print(level_title)
+	--self.role这儿要去掉，重新进入不会重新生成角色,而是根据属性重新计算属性值，去掉buff和debuff这些,另写一个refresh函数		
+	self.role = self:unitborn(self.roleattr) 
 	self.monster = self:unitborn(level.monster)
 	self.story = level.story 
 	local story_result = self:storyplay(self.story)
 	if story_result == STORY_RESULT_PASS then 
 		return self:levelstart(levelid+1)
 	elseif story_result == STORY_RESULT_FIGHT then 
-		return self:fight()
+		local fight_result =  self:fight()
+		if fight_result == FIGHT_RESULT_WIN then 
+			return self:levelstart(levelid+1)
+		elseif fight_result==FIGHT_RESULT_LOSE then
+			print("这儿是战斗失败从0开始")
+			return false
+		end
 	end
 end
 
+--角色行为展示
 function academy:actlist()
 	--将攻击、技能存在一个表里面
 	local skill = self.role.skill
+	local skillnum = #skill
 	local skillinfo = {}
-	for i = 1,MAX_SKILL_NUM do 
+	for i = 1,skillnum do
+		--将可用技能信息存进一个info_n*skillnum的表里面(当前是4个)
+		skillinfo[(i-1)*4+1] = SERIAL[i] 
 		if skill[i] then 
-			skillinfo[(i-1)*2+1] = skill[i].name
-			skillinfo[(i-1)*2+2]= skill[i].desc
+			skillinfo[(i-1)*4+2] = skill[i].name 
+			skillinfo[(i-1)*4+3]= skill[i].cost  
+			skillinfo[(i-1)*4+4]= skill[i].desc 
 		else
-			skillinfo[(i-1)*2+1] = ""
-			skillinfo[(i-1)*2+2] = "" 
+			skillinfo[(i-1)*4+2] = ""
+			skillinfo[(i-1)*4+3] = "" 
+			skillinfo[(i-1)*4+4] = "" 
 		end
 	end 
-	local output =[[
-① %s %s
-② %s %s
-③ %s %s
-④ %s %s
-⑤ %s %s
-⑥ %s %s]]
+	local output =string.rep([[
+%s %s[%s]  %s
+]],skillnum)
 	print(string.format(output,table.unpack(skillinfo)))
 end
 

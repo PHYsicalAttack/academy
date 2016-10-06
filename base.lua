@@ -75,6 +75,14 @@ function base_mt:castskill(skillname,target,arg)
 		return false
 	end 
 	skillfunc(self,target,arg)
+	if not target then 
+		 target = self
+	end
+	local col_name1= string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,self.name)
+	local col_name2= string.format(STR_COLOR_FORMAT,STR_COLOR_RED,target.name)
+	local col_skill = string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,skillname)
+	local castword = string.format("%s对%s使用了[%s]",col_name1,col_name2,col_skill)
+	print(castword)
 	return true
 end
 

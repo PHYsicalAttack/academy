@@ -15,12 +15,44 @@ BLENGTH = 100				--战斗回合距离值
 MAX_ATTR_GAIN = 5   		--基础属性成长之和最大值
 MAX_SKILL_NUM = 6 			--能获得的最大技能数
 CRIT_MUTI = 2 				--暴击倍数
+MAX_LAW = 100				--阵营值范围，目前人物阵营值会超出这个范围，
+MIN_LAW = -100				--用来定义客观世界默认的最好和最坏
+MAX_GOOD = 100				--同上
+MIN_GOOD = -100				--同上
+
+
+
 ---常量
 NATT = "NATT" 
-SKILL_NATT_NAME = "普攻攻击"
+SKILL_NATT_NAME = "普通攻击"
 SATT = "SATT"
 STORY_RESULT_PASS = "STORY_RESULT_PASS"
 STORY_RESULT_FIGHT  = "STORY_RESULT_FIGHT"
+FIGHT_RESULT_WIN = "FIGHT_RESULT_WIN"
+FIGHT_RESULT_LOSE = "FIGHT_RESULT_LOSE"
+SERIAL = {"①","②","③","④","⑤","⑥","⑦","⑧","⑨"}
+
+--字符串颜色
+STR_COLOR_FORMAT ="\27[%dm%s\27[0m"
+STR_COLOR_BLACK = 30
+STR_COLOR_RED = 31
+STR_COLOR_GREEN = 32
+STR_COLOR_YELLOW = 33
+STR_COLOR_BLUE = 34
+STR_COLOR_PURPLE = 35
+STR_COLOR_DGREEN = 36
+STR_COLOR_WHITE = 37
+
+--控制码
+ANSI_CLEAR = "\27[2J"
+ANSI_CLEARFULL ="\27[2J\27[H"
+ANSI_POS = "\27[%d;%dH"
+
+--ASCII
+SPACE = 32
+UTF8SPACE = 12288
+
+
 
 
 --异常提示
@@ -30,6 +62,8 @@ ERROR_DELETE_SKILL	="删除技能失败-未拥有改技能或其他未知原因"
 ERROR_SAME_SKILL = "你已拥有这个技能"
 ERROR_UNKNOW_DMGTYPE = "未知伤害类型"
 ERROR_NOT_ENOUGH_MP = "魔法值不足"
+ERROR_INVALID_CONFIG = "配置有误"
+ERROR_INPUT_OUTOF_RANGE = "你的选择不在范围之中"
 
 --其他字符串
 WELCOME = [[

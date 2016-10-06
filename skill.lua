@@ -55,6 +55,45 @@ railgun.func = function (caster,target)
 	target:applydmg({attacker,totaldmg,damagetype})
 end
 
+--[[一方通行技能:反射、xxxxx、xxxxxxx]]
+--反射： 这个技能被动生效调用一次后，会直接改变角色的applydmg方法
+local reflect = {}
+reflect.name = "矢量操作:反射"
+reflect.cost = 0
+reflect.desc = "反射所有魔法伤害"
+skill[reflect.name] = reflect
+reflect.func = function (caster,target)
+	caster.applydmg = nil
+	caster.applydmg = function (caster,t_dmg)
+		local self = caster
+		local attacker,damage,damagetype = table.unpack(t_dmg)
+		local truedmg
+		if damagetype == NATT then 
+			--普攻会计算闪避
+			if math.random(100) <=self.miss then
+				truedmg = 0
+			else 
+				truedmg = damage - self.ndef
+			end
+			self.hp = self.hp - truedmg
+			return true
+		elseif damagetype == SATT then 
+			truedmg = damage - self.sdef
+			--改变伤害来源并反弹伤害，自己不受到伤害
+			attacker:applydmg({self,truedmg,SATT})
+			truedmg = 0
+			self.hp = self.hp - truedmg
+			return true
+		else 
+			print(ERROR_UNKNOW_DMGTYPE)
+			return false
+		end
+
+			-- body
+		end		
+end
+
+
 
 
 
