@@ -45,7 +45,7 @@ function academy:getinput(isstr)
 	else 
 		input = io.read()
 	end
-	if string.byte(input) == nil then
+	if (not input)or string.byte(input) == nil then
 		return self:getinput(isstr)
 	else 
 		return input
@@ -59,7 +59,7 @@ end
 
 --延时程序,没吊用,就是在那等几秒(支持0.01s数量级)
 function academy:delay(delay)
-	local delay = delay or 3
+	local delay = self:decfloor(delay) or 3
 	local i =10000
 	local pre = self:decfloor(os.clock())
 	while self:decfloor(os.clock())<pre +delay do
@@ -67,6 +67,14 @@ function academy:delay(delay)
 	end
 	return delay
 end
+
+--彩色字输出
+function academy:colprint(ansi_str)
+	local str 
+
+	-- body
+end
+
 
 --单位生成
 function academy:unitborn(t)
@@ -95,12 +103,10 @@ end
 --创建角色
 function academy:createrole()
 	--print(string.rep("\n",1000))
-	os.execute("clear")
+	print(ANSI_RESET_CLEAR)
+	--os.execute("clear")
 	local attr = 15
-	print([[请分配熟悉点至体质、精神、敏捷：
-每一点体质增加10点生命，1点普通攻击，1点普通防御
-每一点精神增加5点魔法，2.5点技能伤害，1点魔法防御
-每一点敏捷增加0.4的速度，0.2暴击，0.2闪避]])
+	print(CREATEWORD)
 	--这儿是属性分配读取
 	local con,spir,agil = 5,5,5
 	--随机获得成长,升一级获得5点属性
@@ -117,45 +123,12 @@ function academy:createrole()
 	local law = 5 				--虚假阵营值秩序,由各种剧情选择改变
 	local good = 5 				--虚假阵营值善良,由各种剧情选择改变
 	--保存生成的属性
-	self.roleattr = {con=con,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,level=1,name=name,law=law,good=good}
+	self.roleattr = {level=1,name=name,con=con,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,law=law,good=good}
 	self.role = self:unitborn(self.roleattr)
 	--生成角色时增加普通攻击
 	self.role:addskill(SKILL_NATT_NAME)
 	return self:levelstart(1)
 end 
-
---每次进入(退出?)关卡后刷新角色属性,并去掉所有modifier
-function academy:rolefresh()
-	-- body
-end
-
---战斗是宠物小精灵xy
-function academy:fight()
-	if self.role:isdie() then 			--玩家死亡
-		return FIGHT_RESULT_LOSE
-	elseif self.monster:isdie() then 
-		return FIGHT_RESULT_WIN
-	end
-
-	--如果是真，则让玩家采取行动，否则怪物AI
-	local battleturn = fight:battlespeed(self.role,self.monster)
-	if battleturn == true  then 
-		self.role:addskill("超电磁炮")
-		self.monster:addskill("矢量操作:反射")
-		--self.monster:castskill("矢量操作:反射")
-		print("角色生命","怪物生命")
-		print(self.role.hp,self.monster.hp)
-		self:actlist()
-		--local act = self:getinput()
-		--print(act)
-		self.role:castskill("超电磁炮",self.monster)
-		--self.role:castskill("普通攻击",self.monster)
-		print(self.role.hp,self.monster.hp)
-	else
-		print(self.monster.bpos)
-	end
-	return self:fight() 
-end
 
 --剧情播放
 function academy:storyplay(story_t,id)
@@ -208,7 +181,66 @@ function academy:storyplay(story_t,id)
 	end
 end
 
---怪物
+--每次进入关卡后刷新角色战斗属性,并去掉所有modifier。开战斗前调用来释放怪物被动？
+function academy:refresh(level)
+	--刷新所有的战斗属性,如果还没有战斗胜利或战斗失败则不刷新
+	--print(self.role.bspd)
+	if self.wintimes or self.losetimes then 
+		local unit = self.role 
+		unit.hp = math.floor(unit.con+unit.level*unit.conplv)*HP_PER_CON
+		unit.natt = math.floor(unit.con+unit.level*unit.conplv)*NATT_PER_CON
+		unit.ndef = math.floor(unit.con+unit.level*unit.conplv)*NDEF_PER_CON
+		unit.mp = math.floor(unit.spir+unit.level*unit.spirplv)*MP_PER_SPIR
+		unit.satt = math.floor(unit.spir+unit.level*unit.spirplv)*SATT_PER_SPIR
+		unit.sdef = math.floor(unit.spir+unit.level*unit.spirplv)*SDEF_PER_SPIR
+		unit.bspd = math.floor(unit.agil+unit.level*unit.agilplv)*BSPD_PER_AGIL
+		unit.accu = math.floor(unit.agil+unit.level*unit.agilplv)*ACCU_PER_AGIL
+		unit.miss = math.floor(unit.agil+unit.level*unit.agilplv)*MISS_PER_AGIL
+		unit.crit = math.floor(unit.agil+unit.level*unit.agilplv)*CRIT_PER_AGIL
+	end 
+	--刷新怪物数据
+	self.monster = self:unitborn(level.monster)
+	--怪物增加技能
+	for _,v in ipairs (self.monster._skill) do 
+		self.monster:addskill(v)
+	end
+	--怪物释放超级技能
+	for _,v in ipairs (self.monster._superskill) do 
+		self.monster:castskill(v)
+	end
+end
+
+--战斗是宠物小精灵xy
+function academy:fight()
+	if self.role:isdie() then 			--玩家死亡
+		return FIGHT_RESULT_LOSE
+	elseif self.monster:isdie() then 
+		return FIGHT_RESULT_WIN
+	end
+	--print(ANSI_CLEAR)
+	print(self.monster.bspd,self.monster.bpos,"|| ",self.role.bspd,self.role.bpos)
+	self.battlerounds = self.battlerounds + 1
+	--如果是真，则让玩家采取行动，否则怪物AI
+	local battleturn = fight:battlespeed(self.role,self.monster)
+	if battleturn == true  then 
+		self.role:addskill("超电磁炮")
+		self.monster:addskill("矢量操作:反射")
+		--self.monster:castskill("矢量操作:反射")
+		--self.monster:removeskill("矢量操作:反射")
+		print("角色生命",self.role.hp,"!!! ","怪物生命",self.monster.hp)
+		self:actlist()
+		--local act = self:getinput()
+		--print(act)
+		self.role:castskill("超电磁炮",self.monster)
+		--self.role:castskill("普通攻击",self.monster)
+		print("角色生命",self.role.hp," ","怪物生命",self.monster.hp)
+	else
+		self:delay(math.random()*3)
+		--这儿不能用冒号语法糖，不然传进去的是self.monster
+		self.monster.think(self)
+	end
+	return self:fight() 
+end
 
 --进入关卡
 function academy:levelstart(levelid)
@@ -216,19 +248,24 @@ function academy:levelstart(levelid)
 	local level = self.level[levelid]		
 	local level_title = string.format("第%d关",levelid)
 	print(level_title)
-	--self.role这儿要去掉，重新进入不会重新生成角色,而是根据属性重新计算属性值，去掉buff和debuff这些,另写一个refresh函数		
-	self.role = self:unitborn(self.roleattr) 
-	self.monster = self:unitborn(level.monster)
+	--self.role这儿要去掉，重新进入不会重新生成角色,而是根据属性重新计算属性值，去掉buff和debuff这些,另写一个refresh函数
+	self:refresh(level)
 	self.story = level.story 
 	local story_result = self:storyplay(self.story)
 	if story_result == STORY_RESULT_PASS then 
+		self.storytimes = (self.storytimes or 0) +1 			--剧情通过次数+1
 		return self:levelstart(levelid+1)
-	elseif story_result == STORY_RESULT_FIGHT then 
+	elseif story_result == STORY_RESULT_FIGHT then
+		--[[self.battlerounds是记录的self:fight调用次数,意思是role或者monster每出手一次,rounds就会+1]]
+		self.battlerounds = 0 
 		local fight_result =  self:fight()
 		if fight_result == FIGHT_RESULT_WIN then 
+			self.wintimes = (self.wintimes or 0) +1 			--战斗胜利次数+1
+			self.role:levelup(1000)
 			return self:levelstart(levelid+1)
 		elseif fight_result==FIGHT_RESULT_LOSE then
 			print("这儿是战斗失败从0开始")
+			self.losetimes = (self.losetimes or 0) +1 			--战斗失败次数+1
 			return false
 		end
 	end
@@ -261,8 +298,10 @@ end
 
 --游戏
 function academy:startgame()
+	print(ANSI_RESET_CLEAR)
 	print(WELCOME)
 	self.level = self:getconfig("academy")
+	self:delay(3.7)
 	self:createrole()
 end
 
