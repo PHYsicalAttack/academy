@@ -20,7 +20,7 @@ package.path = package.path ..";" .. pwd .. "/" .."?.lua"
 require("tuning")
 require("debugfunc")
 
-skill = require("skill")   						--skill前面不能加local不然在base中会访问不到,要么在base中重新require.
+skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
 local fight = require("fight")
 local base_mt = require("base")
 
@@ -106,7 +106,8 @@ function academy:createrole()
 	print(ANSI_RESET_CLEAR)
 	--os.execute("clear")
 	local attr = 15
-	print(CREATEWORD)
+	local createword = string.format(CREATEWORD,HP_PER_CON,NATT_PER_CON,NDEF_PER_CON,MP_PER_SPIR,SATT_PER_SPIR,SDEF_PER_SPIR,BSPD_PER_AGIL,ACCU_PER_AGIL,MISS_PER_AGIL,CRIT_PER_AGIL)
+	print(createword)
 	--这儿是属性分配读取
 	local con,spir,agil = 5,5,5
 	--随机获得成长,升一级获得5点属性
@@ -133,7 +134,7 @@ end
 --剧情播放
 function academy:storyplay(story_t,id)
 	do 
-	return STORY_RESULT_FIGHT
+	--return STORY_RESULT_FIGHT
 	end
 	--在剧情里面
 	local story = story_t
@@ -141,7 +142,7 @@ function academy:storyplay(story_t,id)
 	if id > #story then
 		print(story.pass)
 		return STORY_RESULT_PASS
-	elseif id <2 or story.func(self) then 				--第一次不进行判断 
+	elseif id <math.random(#story) or story.func(self) then 				--至少会进行最后一次判断
 		--显示怪物说的话,现将所有对话都存进一个表
 		local dialog = {}
 		for i,v in ipairs(story[id]) do 

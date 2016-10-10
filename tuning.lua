@@ -33,14 +33,14 @@ SERIAL = {"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","⑪","⑫
 
 --字符串颜色
 STR_COLOR_FORMAT ="\27[%dm%s\27[0m"
-STR_COLOR_BLACK = 30
-STR_COLOR_RED = 31
-STR_COLOR_GREEN = 32
-STR_COLOR_YELLOW = 33
-STR_COLOR_BLUE = 34
-STR_COLOR_PURPLE = 35
-STR_COLOR_DGREEN = 36
-STR_COLOR_WHITE = 37
+STR_COLOR_BLACK = 30				--黑色
+STR_COLOR_RED = 31 					--红色
+STR_COLOR_GREEN = 32  				--深绿色
+STR_COLOR_YELLOW = 33 				--橙色
+STR_COLOR_BLUE = 34 				--紫蓝色
+STR_COLOR_PURPLE = 35 				--紫色
+STR_COLOR_DGREEN = 36    			--蓝绿色
+STR_COLOR_WHITE = 37 				--白色
 
 --控制码及显示相关
 ANSI_CLEAR = "\27[2J"
@@ -59,7 +59,7 @@ UTF8SPACE = 12288
 --异常提示
 ERROR_MAX_SKILL_NUM = "\27[31m你已拥有太多技能\27[0m"
 ERROR_DELETE_SKILL_NORM = "\27[31m你无法删除普通攻击\27[0m"
-ERROR_DELETE_SKILL	="\27[31m删除技能失败-未拥有改技能或其他未知原因\27[0m"
+ERROR_DELETE_SKILL	="\27[31m删除技能失败-未拥有该技能或其他未知原因\27[0m"
 ERROR_SAME_SKILL = "\27[31m你已拥有这个技能\27[0m"
 ERROR_UNKNOW_DMGTYPE = "\27[31m未知伤害类型\27[0m"
 ERROR_NOT_ENOUGH_MP = "\27[31m你需要更多的魔法值\27[0m"
@@ -73,9 +73,11 @@ WELCOME ="\n\z
 \27[31m小提示:\27[0m\n\z
 \27[37m1、属性加点和技能选择能给带来战斗的胜利。\n\z
 2、行为选择有时候可以避免不需要的战斗~。\n\z
-3、同一时间只能获得一个有益和一个负面状态\27[0m"
+3、同一时间只能获得一个有益和一个负面状态(暂定)。\n\z
+4、断断续续写,一个人写了很多注释。\n\z
+\27[0m"
 
-CREATEWORD="请分配熟悉点至体质、精神、敏捷：\n\z
-每一点体质增加%s点生命，%s点普通攻击，%s点普通防御\n\z
-每一点精神增加%s点魔法，%s点技能伤害，%s点魔法防御\n\z
-每一点敏捷增加%s的速度，%s暴击，%s闪避"
+CREATEWORD="\27[32m请分配熟悉点至体质、精神、敏捷:\n\z
+\27[37m每一点体质增加%s点生命，%s点普通伤害，%s点普通防御\n\z
+每一点精神增加%s点魔法，%s点魔法伤害，%s点魔法防御\n\z
+每一点敏捷增加%s点速度，%s点命中，%s点闪避，%s点暴击\27[0m"
