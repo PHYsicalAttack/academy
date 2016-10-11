@@ -19,7 +19,6 @@ MAX_GOOD = 100				--同上
 MIN_GOOD = -100				--同上
 LEVEL_TOTAL_EXP = {[1]=5,[2]=8,[3]=17,[4]=30,[5]=53,[6]=90,[7]=151,[8]=250,[9]=400,[10]=99999}  --等级对应的最大经验
 
-
 ---常量
 NATT = "NATT" 
 SKILL_NATT_NAME = "普通攻击"
@@ -29,7 +28,6 @@ STORY_RESULT_FIGHT  = "STORY_RESULT_FIGHT"
 FIGHT_RESULT_WIN = "FIGHT_RESULT_WIN"
 FIGHT_RESULT_LOSE = "FIGHT_RESULT_LOSE"
 SERIAL = {"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","⑪","⑫","⑬","⑭","⑮","⑯"}
-
 
 --字符串颜色
 STR_COLOR_FORMAT ="\27[%dm%s\27[0m"
@@ -53,9 +51,6 @@ SCREEN_HEIGHT = 120
 SPACE = 32
 UTF8SPACE = 12288
 
-
-
-
 --异常提示
 ERROR_MAX_SKILL_NUM = "\27[31m你已拥有太多技能\27[0m"
 ERROR_DELETE_SKILL_NORM = "\27[31m你无法删除普通攻击\27[0m"
@@ -75,9 +70,15 @@ WELCOME ="\n\z
 2、行为选择有时候可以避免不需要的战斗~。\n\z
 3、同一时间只能获得一个有益和一个负面状态(暂定)。\n\z
 4、断断续续写,一个人写了很多注释。\n\z
+5、每次失败后的reskill可以重新挑选技能,reborn则是从新建角色开始。\n\z
 \27[0m"
 
 CREATEWORD="\27[32m请分配熟悉点至体质、精神、敏捷:\n\z
 \27[37m每一点体质增加%s点生命，%s点普通伤害，%s点普通防御\n\z
 每一点精神增加%s点魔法，%s点魔法伤害，%s点魔法防御\n\z
 每一点敏捷增加%s点速度，%s点命中，%s点闪避，%s点暴击\27[0m"
+
+MENTALITY={
+[1] = {"如果给你一亿，但是要你杀掉一百个人，你会这样做吗？"},
+[2] = {"你会经常性关闭弹幕看视频吗？"}
+}

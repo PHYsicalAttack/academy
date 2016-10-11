@@ -50,7 +50,7 @@ function base_mt:isdie()
 	end
 end
 
---升级
+--升级,会返回升了多少级
 function base_mt:levelup(exp)
 	local exp = exp 
 	local prelvl = self.level
@@ -72,7 +72,7 @@ function base_mt:actshow()
 end
 
 --释放技能
-function base_mt:castskill(skillname,target,arg)
+function base_mt:castskill(skillname)
 	local skillfunc
 	local cost 
 	for i,v in ipairs(self.skill) do 

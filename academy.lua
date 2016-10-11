@@ -38,18 +38,13 @@ function academy:getconfig(filename)
 end
 
 --获取输入(游戏不给输入其他文字,只给输入数字)
-function academy:getinput(isstr)
+function academy:getinput()
 	local input
-	if not isstr then
-		input = io.read("*number")
-	else 
-		input = io.read()
-	end
-	if (not input)or string.byte(input) == nil then
-		return self:getinput(isstr)
-	else 
-		return input
-	end
+	repeat
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"请输入数字后按回车:"))
+		input = tonumber(io.read())
+	until input
+	return input
 end
 
 --小数2为取整
@@ -75,6 +70,10 @@ function academy:colprint(ansi_str)
 	-- body
 end
 
+--记录数据
+function academy:record(vname,value)
+	self[vname] = value
+end
 
 --单位生成
 function academy:unitborn(t)
@@ -134,7 +133,7 @@ end
 --剧情播放
 function academy:storyplay(story_t,id)
 	do 
-	--return STORY_RESULT_FIGHT
+		return STORY_RESULT_FIGHT
 	end
 	--在剧情里面
 	local story = story_t
@@ -218,23 +217,41 @@ function academy:fight()
 	elseif self.monster:isdie() then 
 		return FIGHT_RESULT_WIN
 	end
-	--print(ANSI_CLEAR)
+	--print(ANSI_RESET_CLEAR)
 	print(self.monster.bspd,self.monster.bpos,"|| ",self.role.bspd,self.role.bpos)
 	self.battlerounds = self.battlerounds + 1
 	--如果是真，则让玩家采取行动，否则怪物AI
 	local battleturn = fight:battlespeed(self.role,self.monster)
 	if battleturn == true  then 
+		
+--[[
 		self.role:addskill("超电磁炮")
 		self.monster:addskill("矢量操作:反射")
 		--self.monster:castskill("矢量操作:反射")
 		--self.monster:removeskill("矢量操作:反射")
 		print("角色生命",self.role.hp,"!!! ","怪物生命",self.monster.hp)
-		self:actlist()
 		--local act = self:getinput()
 		--print(act)
 		self.role:castskill("超电磁炮",self.monster)
 		--self.role:castskill("普通攻击",self.monster)
 		print("角色生命",self.role.hp," ","怪物生命",self.monster.hp)
+    ]]
+
+		self:actlist()
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"请选择下一步行动:"))
+		local actionid 
+		repeat 
+			if actionid then 
+				print(ERROR_INPUT_OUTOF_RANGE)
+			end
+			actionid = self:getinput()
+		until self.role.skill[actionid]
+		--技能选择目标，拙略的
+		local target = self.monster
+		if  self.role.skill[actionid].passive then 
+			target = self
+		end
+		self.role:castskill(self.role.skill[actionid].name,target)
 	else
 		self:delay(math.random()*3)
 		--这儿不能用冒号语法糖，不然传进去的是self.monster
@@ -245,11 +262,11 @@ end
 
 --进入关卡
 function academy:levelstart(levelid)
+	self:record("curlevelid",levelid)
 	--生成基本信息
 	local level = self.level[levelid]		
-	local level_title = string.format("第%d关",levelid)
+	local level_title = string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"第".. levelid .. "关")
 	print(level_title)
-	--self.role这儿要去掉，重新进入不会重新生成角色,而是根据属性重新计算属性值，去掉buff和debuff这些,另写一个refresh函数
 	self:refresh(level)
 	self.story = level.story 
 	local story_result = self:storyplay(self.story)
@@ -280,11 +297,11 @@ function academy:actlist()
 	local skillinfo = {}
 	for i = 1,skillnum do
 		--将可用技能信息存进一个info_n*skillnum的表里面(当前是4个)
-		skillinfo[(i-1)*4+1] = SERIAL[i] 
+		skillinfo[(i-1)*4+1] = string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,SERIAL[i])
 		if skill[i] then 
-			skillinfo[(i-1)*4+2] = skill[i].name 
-			skillinfo[(i-1)*4+3]= skill[i].cost  
-			skillinfo[(i-1)*4+4]= skill[i].desc 
+			skillinfo[(i-1)*4+2] = string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,skill[i].name) 
+			skillinfo[(i-1)*4+3] = string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"[" .. skill[i].cost .. "]")  
+			skillinfo[(i-1)*4+4] = string.format(STR_COLOR_FORMAT,STR_COLOR_WHITE,skill[i].desc)
 		else
 			skillinfo[(i-1)*4+2] = ""
 			skillinfo[(i-1)*4+3] = "" 
@@ -292,7 +309,7 @@ function academy:actlist()
 		end
 	end 
 	local output =string.rep([[
-%s %s[%s]  %s
+%s %s%s  %s
 ]],skillnum)
 	print(string.format(output,table.unpack(skillinfo)))
 end
@@ -302,7 +319,7 @@ function academy:startgame()
 	print(ANSI_RESET_CLEAR)
 	print(WELCOME)
 	self.level = self:getconfig("academy")
-	self:delay(3.7)
+	--self:delay(3.7)
 	self:createrole()
 end
 

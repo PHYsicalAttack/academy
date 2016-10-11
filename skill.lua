@@ -3,6 +3,7 @@ local skill ={}
 
 --普通攻击
 local noratt = {}
+noratt.passive = true
 noratt.name = SKILL_NATT_NAME
 noratt.cost = 0
 noratt.desc = "普通攻击,造成等于攻击力的普攻伤害"
