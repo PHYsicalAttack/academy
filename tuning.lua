@@ -1,4 +1,5 @@
 --属性值
+INIT_ATTR = 15  			--初始属性
 HP_PER_CON=10 				--每点体质增加hp值
 NATT_PER_CON=1 				--每点体质增加普攻值
 NDEF_PER_CON =1 			--每点体质增加普防值
@@ -29,6 +30,10 @@ FIGHT_RESULT_WIN = "FIGHT_RESULT_WIN"
 FIGHT_RESULT_LOSE = "FIGHT_RESULT_LOSE"
 SERIAL = {"①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","⑪","⑫","⑬","⑭","⑮","⑯"}
 
+--战斗提示
+FIGHT_MISS = "\27[33m闪避\27[0m"
+
+
 --字符串颜色
 STR_COLOR_FORMAT ="\27[%dm%s\27[0m"
 STR_COLOR_BLACK = 30				--黑色
@@ -43,7 +48,7 @@ STR_COLOR_WHITE = 37 				--白色
 --控制码及显示相关
 ANSI_CLEAR = "\27[2J"
 ANSI_RESET_CLEAR ="\27[2J\27[H"
-ANSI_POS = "\27[%d;%dH"
+ANSI_POS = "\27[%d;%dH%s"
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 120
 
@@ -57,10 +62,14 @@ ERROR_DELETE_SKILL_NORM = "\27[31m你无法删除普通攻击\27[0m"
 ERROR_DELETE_SKILL	="\27[31m删除技能失败-未拥有该技能或其他未知原因\27[0m"
 ERROR_SAME_SKILL = "\27[31m你已拥有这个技能\27[0m"
 ERROR_UNKNOW_DMGTYPE = "\27[31m未知伤害类型\27[0m"
-ERROR_NOT_ENOUGH_MP = "\27[31m你需要更多的魔法值\27[0m"
+ERROR_NOT_ENOUGH_MP = "\27[31m由于魔法值不足,可怜的你并没有放出任何技能……\27[0m"
 ERROR_PASSIVE_SKILL = "\27[31m你不能使用一个被动技能\27[0m"
 ERROR_INVALID_CONFIG = "\27[31m配置有误\27[0m"
 ERROR_INPUT_OUTOF_RANGE = "\27[31m你的选择不在范围之中\27[0m"
+
+
+
+
 
 --其他字符串
 WELCOME ="\n\z
@@ -69,8 +78,10 @@ WELCOME ="\n\z
 \27[37m1、属性加点和技能选择能给带来战斗的胜利。\n\z
 2、行为选择有时候可以避免不需要的战斗~。\n\z
 3、同一时间只能获得一个有益和一个负面状态(暂定)。\n\z
-4、断断续续写,一个人写了很多注释。\n\z
+4、最多能同时拥有5个技能,等级最多10级。\n\z
 5、每次失败后的reskill可以重新挑选技能,reborn则是从新建角色开始。\n\z
+6、魔法值会在每回合开始时随机恢复。\n\z
+7、游戏共有10个关卡。\n\z
 \27[0m"
 
 CREATEWORD="\27[32m请分配熟悉点至体质、精神、敏捷:\n\z
@@ -79,6 +90,6 @@ CREATEWORD="\27[32m请分配熟悉点至体质、精神、敏捷:\n\z
 每一点敏捷增加%s点速度，%s点命中，%s点闪避，%s点暴击\27[0m"
 
 MENTALITY={
-[1] = {"如果给你一亿，但是要你杀掉一百个人，你会这样做吗？"},
-[2] = {"你会经常性关闭弹幕看视频吗？"}
+[1] = {"如果给你一亿，但是要你杀掉一百个人，你会这样做吗？",-100,-100},
+[2] = {"你会经常性关闭弹幕看视频吗？",-100,-100}
 }

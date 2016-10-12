@@ -17,11 +17,21 @@ end
 
 --受到伤害
 function base_mt:applydmg(t_dmg)
+	if self.bfapplydmg then 
+		self.bfapplydmg(t_dmg)
+	end
+	--[[local animation ={{4,4,"*"},{4,5,"*"},{4,6,"*"}}
+	for i,v in ipairs(animation) do
+		local draw = string.format(	ANSI_POS ,table.unpack(v))
+		print(draw)
+	end
+	print("\27[3B")]]
 	local attacker,damage,damagetype = table.unpack(t_dmg)
 	local truedmg
 	if damagetype == NATT then 
 		--普攻会计算闪避
 		if math.random(100) <=self.miss then
+			print(FIGHT_MISS)
 			truedmg = 0
 		else 
 			truedmg = damage - self.ndef
@@ -72,11 +82,14 @@ function base_mt:actshow()
 end
 
 --释放技能
-function base_mt:castskill(skillname)
+function base_mt:castskill(skillname,target)
+	local skill
 	local skillfunc
-	local cost 
+	local cost
+	local target = target 
 	for i,v in ipairs(self.skill) do 
-		if v.name == skillname then 
+		if v.name == skillname then
+			skill = v  
 			skillfunc = v.func
 			cost = v.cost
 			break
@@ -87,9 +100,9 @@ function base_mt:castskill(skillname)
 		print(ERROR_NOT_ENOUGH_MP)
 		return false
 	end
-		--self.mp = self.mp -cost 
-	if not target then 
-		 target = self
+	self.mp = self.mp -cost 
+	if skill.passive == true then 
+		target = self
 	end
 	--释放技能记录打印
 	local col_name1= string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,self.name)
@@ -97,6 +110,9 @@ function base_mt:castskill(skillname)
 	local col_skill = string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,skillname)
 	local castword = string.format("%s对%s使用了[%s]",col_name1,col_name2,col_skill)
 	print(castword)
+	if self.bfcastskill then 
+		self.bfcastskill()
+	end
 	skillfunc(self,target,arg)
 	return true
 end
