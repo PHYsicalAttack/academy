@@ -1,19 +1,6 @@
 academy ={}
 --全局设置
 math.randomseed(os.time())
---[[HP_PER_CON=10 				--每点体质增加hp值
-NATT_PER_CON=1 				--每点体质增加普攻值
-NDEF_PER_CON =1 			--每点体质增加普防值
-MP_PER_SPIR = 5 			--每点精神增加mp值
-SATT_PER_SPIR = 2.5  		--每点精神增加技能攻击值
-SDEF_PER_SPIR = 1 			--每点精神增加技能防御值
-BSPD_PER_AGIL = 4         	--每点敏捷增加战斗速度值
-ACCU_PER_AGIL = 1   		--每点敏捷增加命中值，只有闪避时才额外计算
-MISS_PER_AGIL = 1 			--每点敏捷增加闪避值
-CRIT_PER_AGIL = 1 			--每点敏捷增加的暴击值
-BASEEXP_LEVEL_NEED = 10 	--升级需要的基础经验
-ADJEXP_LEVEL_NEED = 3 		--升级调整经验(adjexp*level)
-BLENGTH=100					--战斗回合距离值]]
 
 local pwd = string.sub(io.popen("pwd"):read("*a"),1,-2) 
 package.path = package.path ..";" .. pwd .. "/" .."?.lua"
@@ -43,9 +30,8 @@ function academy:getinput()
 	repeat
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"请输入数字后按回车:"))
 		input = io.read()
-		if input == "myinfo" then 
-			dump(self.role)
-		end
+		if input == "myinfo" then dump(self.role) end
+		if input == "moninfo" then dump(self.monster) end
 		input = tonumber(input)
 	until input
 	return math.floor(input)
@@ -65,13 +51,6 @@ function academy:delay(delay)
 		 i = i +10000
 	end
 	return delay
-end
-
---彩色字输出
-function academy:colprint(ansi_str)
-	local str 
-
-	-- body
 end
 
 --记录数据
@@ -108,6 +87,7 @@ function academy:createrole()
 	--print(string.rep("\n",1000))
 	print(ANSI_RESET_CLEAR)
 	--os.execute("clear")
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"开始生成角色……"))
 	local attr = INIT_ATTR
 	local createword = string.format(CREATEWORD,HP_PER_CON,NATT_PER_CON,NDEF_PER_CON,MP_PER_SPIR,SATT_PER_SPIR,SDEF_PER_SPIR,BSPD_PER_AGIL,ACCU_PER_AGIL,MISS_PER_AGIL,CRIT_PER_AGIL)
 	print(createword,"\n")
@@ -137,7 +117,7 @@ function academy:createrole()
 		end 
 	end
 	--随机获得成长,升一级获得5点属性
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"正在随机生成随机属性成长……\n"))
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"正在随机生成随机属性成长(智商不会超过5)……\n"))
 	self:delay(1.3)
 	local conplv,spirplv,agilplv
 	repeat
@@ -147,10 +127,10 @@ function academy:createrole()
 	until conplv+spirplv+agilplv <= MAX_ATTR_GAIN
 	
 	--指定角色名
-	local name = "小栗"
+	local name = "小栗优一"
 	local ccccol = {32,36,33}
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,name .. "?你确定以下面的属性开始游戏吗?"))
-	print(string.format("\27[32m体质:%s \27[36m精神:%s \27[33m敏捷:%s \n\27[32m体质成长:%s \27[36m精神成长:%s \27[33m敏捷成长:%s ",con,spir,agil,conplv,spirplv,agilplv))
+	print(string.format("\27[32m基础体质:%s \27[36m基础精神:%s \27[33m基础敏捷:%s \n\27[32m体质成长:%s \27[36m精神成长:%s \27[33m敏捷成长:%s ",con,spir,agil,conplv,spirplv,agilplv))
 	local sure = {"是,开始游戏!","否,我想重建角色……"}
 	local sure_str = "\n"
 	for i,v in ipairs(sure) do
@@ -176,7 +156,7 @@ function academy:createrole()
 	--获得角色初始阵营值
 	local law = 100 				--虚假阵营值秩序,由各种剧情选择改变
 	local good = 100 				--虚假阵营值善良,由各种剧情选择改变
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)开始学园都市人格测试……"))
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)开始学园都市人格测试……\n"))
 	for i,v in ipairs(MENTALITY) do 
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,i .. "、" .. v[1]))
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"① 是\n② 否"))
@@ -187,13 +167,19 @@ function academy:createrole()
 		elseif men_ans ==2 then
 			law = law -v[2]
 			good = good -v[3]
+		else
+			law = law - 20
+			good = good -20
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)怀疑你是智障……"))
 		end
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"\n(机器人声音)读取下一题……"))
+		self:delay(1.3)
 	end
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)测试完毕……"))
 	local robotword = string.format("\27[36m(机器人声音)经测试你的阵营值是 %s……\27[0m",-100)
 	print(robotword)
 	self:delay(1.3)
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)感觉你这样的路人在学院都市中活不过1……"))
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)感觉你这样的路人在学院都市中活不过1 ……"))
 	self:delay(1.3)
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(你狠狠地踹了测试机器一脚!!)"))
 	self:delay(1.3)
@@ -207,37 +193,41 @@ function academy:createrole()
 	self.roleattr = {level=1,name=name,body = body,con=con,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,law=law,good=good}
 	self.role = self:unitborn(self.roleattr)
 	--生成角色时增加普通攻击
+	--self.role.skill = nil 
 	self.role:addskill(SKILL_NATT_NAME)
 	self.role:addskill("超电磁炮")
+	print(ANSI_RESET_CLEAR)
 	return self:levelstart(1)
 end 
 
 --剧情播放
 function academy:storyplay(story_t,id)
 	do 
-		return STORY_RESULT_FIGHT
+		--return STORY_RESULT_FIGHT
 	end
 	--在剧情里面
 	local story = story_t
 	local id = id or 1
 	if id > #story then
-		print(story.pass)
+		self:delay(1.3)
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":" .. story.pass))
+		self:delay(1.3)
 		return STORY_RESULT_PASS
-	elseif id < math.random(#story) or story.func(self) then 				--至少会进行最后一次判断
+	elseif id < 4 or story.func(self) then 				--跳过前3次对话的判断
 		--显示怪物说的话,现将所有对话都存进一个表
 		local dialog = {}
 		for i,v in ipairs(story[id]) do 
 			if type(v) == "string" then 
 				dialog[#dialog+1] = v 
 			elseif  type(v) == "table" then 
-				dialog[#dialog+1] = SERIAL[i-1] ..string.char(SPACE) ..  v[1]
+				dialog[#dialog+1] = string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,SERIAL[i-1] ..string.char(SPACE) ..  v[1])
 			else
 				print(ERROR_INVALID_CONFIG)
 			end
 		end
 		--开始逐步显示dialog,先显示怪物说的话,稍等后再显示选择
-		print(dialog[1])
-		self:delay(0.7)
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":".. dialog[1]))
+		self:delay(1.3)
 		for i,v in ipairs(dialog) do 
 			if i >1 then 
 				print(v)
@@ -258,7 +248,9 @@ function academy:storyplay(story_t,id)
 		--符合条件继续进行下一个
 		return self:storyplay(story,id+1)
 	else 
-		print(story.fight)
+		self:delay(1.3)
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":" .. story.fight))
+		self:delay(1.3+1.3)
 		return STORY_RESULT_FIGHT
 	end
 end
@@ -279,9 +271,14 @@ function academy:refresh(level)
 		unit.accu = math.floor(unit.agil+(unit.level-1)*unit.agilplv)*ACCU_PER_AGIL
 		unit.miss = math.floor(unit.agil+(unit.level-1)*unit.agilplv)*MISS_PER_AGIL
 		unit.crit = math.floor(unit.agil+(unit.level-1)*unit.agilplv)*CRIT_PER_AGIL
+		unit.bpos = 0
 	end 
-	--刷新怪物数据
-	self.monster = self:unitborn(level.monster)
+	--刷新怪物数据从关卡配置中复制属性数据
+	local temp = {}
+	for k,v in pairs(level.monster) do
+		temp[k] = v 
+	end 
+	self.monster = self:unitborn(temp)
 	--怪物增加技能
 	for _,v in ipairs (self.monster._skill) do 
 		self.monster:addskill(v)
@@ -326,15 +323,15 @@ function academy:fight()
 	elseif self.monster:isdie() then 
 		return FIGHT_RESULT_WIN
 	end
-	--print(ANSI_RESET_CLEAR)
+	print(ANSI_RESET_CLEAR)
 	self.battlerounds = self.battlerounds + 1
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"第" .. self.battlerounds .."回合"))
 	--回复魔法值计算
 	local unit= self.role
-	if math.random(10000)/100 <= 5 * math.floor(unit.spir+unit.level*unit.spirplv) then
-		local add_mp = math.floor(unit.spir+unit.level*unit.spirplv)
+	if math.random(10000)/100 <= 2 * math.floor(unit.spir+(unit.level-1)*unit.spirplv) then
+		local add_mp = math.floor(unit.spir+(unit.level-1)*unit.spirplv)
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"幸运发生了,你恢复了一些魔法……"))
-		self.role.mp = math.min(math.floor(unit.spir+unit.level*unit.spirplv)*MP_PER_SPIR,self.role.mp+add_mp)
+		self.role.mp = math.min(math.floor(unit.spir+(unit.level-1)*unit.spirplv)*MP_PER_SPIR,self.role.mp+add_mp)
 	end
 	self:fightinfo()
 	--如果是真，则让玩家采取行动，否则怪物AI
@@ -358,6 +355,7 @@ function academy:fight()
 		print(thinkword)
 		self:delay(delaytime)
 		self.monster.think(self)
+		self:delay(1)
 	end
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"\n\n正在打扫战场……"))
 	self:delay(1.5)
@@ -370,28 +368,97 @@ function academy:levelstart(levelid)
 	self:record("curlevelid",levelid)
 	--生成基本信息
 	local level = self.level[levelid]
-	self:refresh(level)	
-	local level_title = string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"第".. levelid .. "关")
+	self:refresh(level)
+	print(ANSI_RESET_CLEAR)	
+	local level_title = string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"第".. levelid .. "关  " ..level.name)
 	print(level_title)
-	self.story = level.story 
+
+	local col_name1 = string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,self.role.name) 		--人物形象。。
+	local col_name2 = string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name)
+	local nameoutput = string.format("%s%s%s",col_name1,string.rep(utf8.char(32),32),col_name2)
+	print(nameoutput) 
+	print(self.role.body)
+	self.story = level.story 		
 	local story_result = self:storyplay(self.story)
 	if story_result == STORY_RESULT_PASS then 
 		self.storytimes = (self.storytimes or 0) +1 			--剧情通过次数+1
-		return self:levelstart(levelid+1)
+		return self:levelpass(levelid)
 	elseif story_result == STORY_RESULT_FIGHT then
 		--[[self.battlerounds是记录的self:fight调用次数,意思是role或者monster每出手一次,rounds就会+1]]
 		self.battlerounds = 0 
 		local fight_result =  self:fight()
 		if fight_result == FIGHT_RESULT_WIN then 
 			self.wintimes = (self.wintimes or 0) +1 			--战斗胜利次数+1
-			self.role:levelup(1000)
-			return self:levelstart(levelid+1)
+			return self:levelpass(levelid)
 		elseif fight_result==FIGHT_RESULT_LOSE then
-			print("这儿是战斗失败从0开始")
+			print(string.format(STR_COLOR_FORMAT,STR_COLOR_RED,"战斗失败,你得到了一次惨烈的教训……"))
 			self.losetimes = (self.losetimes or 0) +1 			--战斗失败次数+1
-			return false
+			self:delay(1.3+1.3)
+			return self:restart()
 		end
 	end
+end
+
+--levelpass
+function academy:levelpass(curlevelid)
+	local passed = self.level[curlevelid]
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"通关成功!"))
+	local exp = passed.exp
+	local loot = passed.loot
+	local leveladd = self.role:levelup(exp)
+	if leveladd > 0 then 
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"等级提升了"..leveladd .. "级"))
+	end
+	local realloot ={}
+	for i,v in ipairs(loot) do 
+		if math.random(10000) <= v[1] then 
+			table.insert(realloot,v[2])
+		end
+	end
+	--拾取战利品
+	if #realloot >0 then 
+		repeat
+			local str = ""
+			for i,v in ipairs(realloot) do
+				str = str .. SERIAL[i] .. utf8.char(32) .. v .. "\n"
+			end
+			print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,"\n\n幸运发生了,你有未学习的技能:"))
+			print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,str))
+			if #self.role.skill == MAX_SKILL_NUM then 
+				print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,"已经有6个技能,请选择一个来忘记!"))
+				local forgetid 
+				repeat
+					if forgetid then 
+						print(ERROR_INPUT_OUTOF_RANGE) 
+					end
+					forgetid = self:getinput()
+				until self.role.skill[forgetid]
+				self.role:removeskill(self.role.skill[forgetid].name)
+			else 
+				print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,"请选择你要学习的技能:"))
+				local learnid = self:getinput()
+				if realloot[learnid] then
+					print(string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"你学会了" .. realloot[learnid]))
+					self.role:addskill(realloot[learnid])
+					table.remove(realloot,learnid)
+				else
+					local dropid = math.random(#realloot)
+					print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"你没有学会" .. realloot[dropid]))
+					table.remove(realloot,dropid)
+				end
+			end
+		until #realloot == 0
+	end
+	--开始下一关
+	self:levelstart(curlevelid+1)
+
+end
+
+
+
+--re0
+function academy:restart()
+	return self:createrole()
 end
 
 --角色行为展示
@@ -428,7 +495,7 @@ function academy:startgame()
 	print(ANSI_RESET_CLEAR)
 	print(WELCOME)
 	self.level = self:getconfig("academy")
-	--self:delay(3.7)
+	self:delay(5)
 	self:createrole()
 end
 

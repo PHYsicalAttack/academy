@@ -17,15 +17,15 @@ noratt.func = function (caster,target)
 	local damagetype = NATT
 	target:applydmg({attacker,damage,damagetype})
 end
-
+--[[第一关混混技能]]
 --强力击
 local poweratt = {}
 poweratt.name = "强力击"
-poweratt.cost =5
-poweratt.desc = "强力攻击,造成3倍于攻击力的普攻伤害"
+poweratt.cost = 3
+poweratt.desc = "强力攻击,造成2倍于攻击力的普攻伤害"
 skill[poweratt.name] = poweratt
 poweratt.func = function (caster,target)
-	local poweratt_muti = 3				--强力击倍数
+	local poweratt_muti = 2				--强力击倍数
 	local damage = (caster.natt*poweratt_muti)
 	--强力击计算暴击
 	if math.random(100) <= caster.crit then 
@@ -35,7 +35,23 @@ poweratt.func = function (caster,target)
 	local damagetype = NATT
 	target:applydmg({attacker,damage,damagetype})
 end
- 
+--小型火焰
+local smallfire ={}
+smallfire.name = "操纵火焰"
+smallfire.cost = 5
+smallfire.desc = "操纵小型火焰攻击敌人,造成少量魔法伤害"
+skill[smallfire.name] = smallfire
+smallfire.func = function (caster,target)
+	local base_damage = 14
+	local spir_damge = caster.satt
+	local attacker = caster
+	local damagetype = SATT
+	local damage = base_damage +spir_damge
+	target:applydmg({attacker,damage,damagetype})
+end
+
+
+--[[炮姐技能:超电磁炮、]]
 --超电磁炮
 local railgun = {}
 railgun.name = "超电磁炮"

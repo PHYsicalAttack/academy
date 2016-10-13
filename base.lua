@@ -1,5 +1,5 @@
 --角色方法表
-local base_mt = {level=0,exp=0,hp=200,mp=50,natt=20,ndef=0,sdef=0,bpos=0,bspd=0,accu=0,miss=0,crit=0,skill={},buffround={},name ="name",law=0,good=0}
+local base_mt = {level=0,exp=0,hp=200,mp=50,natt=20,ndef=0,satt=0,sdef=0,bpos=0,bspd=0,accu=0,miss=0,crit=0,skill={},buffround={},name ="name",law=0,good=0}
 base_mt.__index = base_mt
 
 --获取某项
