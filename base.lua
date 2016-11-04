@@ -3,8 +3,16 @@ local base_mt = {level=0,exp=0,hp=200,mp=50,natt=20,ndef=0,satt=0,sdef=0,bpos=0,
 base_mt.__index = base_mt
 
 --获取某项
-function base_mt:getattr(attrname)
-	return self[attrname]
+function base_mt:getattr(attrid)
+	if attrid ==1 then 
+		return math.floor(self.con+(self.level-1)*self.conplv)
+	elseif attrid ==2 then 
+		return math.floor(self.spir+(self.level-1)*self.spirplv)
+	elseif attrid == 3 then
+		return math.floor(self.agil+(self.level-1)*self.agilplv)
+	else
+		return {self.con,self.spir,self.agil}
+	end
 end
 
 --攻击行为
@@ -157,7 +165,9 @@ function base_mt:removeskill(skillname)
 end
 
 --add modifier
-function base_mt:addmodifier(modname)
+function base_mt:addmodifier(caster,modifiername,durationtime)
+	local modifier = getmodifier(modifiername)
+	
 	-- body
 end
 

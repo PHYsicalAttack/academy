@@ -154,8 +154,8 @@ function academy:createrole()
    ◎   ◎                    		   ⊥   ⊥
 ]]
 	--获得角色初始阵营值
-	local law = 100 				--虚假阵营值秩序,由各种剧情选择改变
-	local good = 100 				--虚假阵营值善良,由各种剧情选择改变
+	local law = 0 				--虚假阵营值秩序,由各种剧情选择改变
+	local good = 0 				--虚假阵营值善良,由各种剧情选择改变
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)开始学园都市人格测试……\n"))
 	for i,v in ipairs(MENTALITY) do 
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,i .. "、" .. v[1]))
@@ -435,7 +435,7 @@ function academy:levelpass(curlevelid)
 				until self.role.skill[forgetid]
 				self.role:removeskill(self.role.skill[forgetid].name)
 			else 
-				print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,"请选择你要学习的技能:"))
+				print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,"请输入你想要学习的技能序号(错误的输入会随机放弃某个技能):"))
 				local learnid = self:getinput()
 				if realloot[learnid] then
 					print(string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"你学会了" .. realloot[learnid]))
@@ -450,6 +450,7 @@ function academy:levelpass(curlevelid)
 		until #realloot == 0
 	end
 	--开始下一关
+	self:delay(1.3)
 	self:levelstart(curlevelid+1)
 
 end
