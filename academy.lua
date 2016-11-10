@@ -6,7 +6,9 @@ local pwd = string.sub(io.popen("pwd"):read("*a"),1,-2)
 package.path = package.path ..";" .. pwd .. "/" .."?.lua"
 require("tuning")
 require("debugfunc")
-
+SUPERDEBUG = true
+COMMONDELAY = COMMONDELAY -1
+FIRSTLEVEL = 1
 skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
 local fight = require("fight")
 local base_mt = require("base")
@@ -92,33 +94,35 @@ function academy:createrole()
 	local createword = string.format(CREATEWORD,HP_PER_CON,NATT_PER_CON,NDEF_PER_CON,MP_PER_SPIR,SATT_PER_SPIR,SDEF_PER_SPIR,BSPD_PER_AGIL,ACCU_PER_AGIL,MISS_PER_AGIL,CRIT_PER_AGIL)
 	print(createword,"\n")
 	--这儿是属性分配读取
-	local con,spir,agil --= 5,5,5
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"请输入你要分配的体质:" .. "(" ..attr .. "点属性未分配)"))
- 	while true do
-		local i = self:getinput()
-		if i > 0 and i < attr then
-			con = i
-			attr = attr - i
-			break 
-		else 
-			print(string.format(STR_COLOR_FORMAT,STR_COLOR_RED,"你的数学是体育老师教的吗?"))
-		end 
-	end
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"请输入你要分配的精神:".. "(" ..attr .. "点属性未分配)"))
-	while true do
-		local i = self:getinput()
-		if i > 0 and i < attr then
-			spir = i
-			attr = attr - i
-			agil = attr
-			break 
-		else 
-			print(string.format(STR_COLOR_FORMAT,STR_COLOR_RED,"你的数学是体育老师教的吗?"))
-		end 
+	local con,spir,agil = 5,5,5
+	if not SUPERDEBUG then 	
+	 	while true do
+			local i = self:getinput()
+			if i > 0 and i < attr then
+				con = i
+				attr = attr - i
+				break 
+			else 
+				print(string.format(STR_COLOR_FORMAT,STR_COLOR_RED,"你的数学是体育老师教的吗?"))
+			end 
+		end
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"请输入你要分配的精神:".. "(" ..attr .. "点属性未分配)"))
+		while true do
+			local i = self:getinput()
+			if i > 0 and i < attr then
+				spir = i
+				attr = attr - i
+				agil = attr
+				break 
+			else 
+				print(string.format(STR_COLOR_FORMAT,STR_COLOR_RED,"你的数学是体育老师教的吗?"))
+			end 
+		end
 	end
 	--随机获得成长,升一级获得5点属性
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"正在随机生成随机属性成长(智商不会超过5)……\n"))
-	self:delay(1.3)
+	self:delay(COMMONDELAY)
 	local conplv,spirplv,agilplv
 	repeat
 		conplv = self:decfloor(math.random()*5)
@@ -156,39 +160,44 @@ function academy:createrole()
 	--获得角色初始阵营值
 	local law = 0 				--虚假阵营值秩序,由各种剧情选择改变
 	local good = 0 				--虚假阵营值善良,由各种剧情选择改变
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)开始学园都市人格测试……\n"))
-	for i,v in ipairs(MENTALITY) do 
-		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,i .. "、" .. v[1]))
-		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"① 是\n② 否"))
-		local men_ans = self:getinput()
-		if men_ans == 1 then 
-			law = law + v[2]
-			good = good +v[3]
-		elseif men_ans ==2 then
-			law = law -v[2]
-			good = good -v[3]
-		else
-			law = law - 20
-			good = good -20
-		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)怀疑你是智障……"))
-		end
-		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"\n(机器人声音)读取下一题……"))
-		self:delay(1.3)
+	if SUPERDEBUG then 
+		law,good = 100,100
 	end
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)测试完毕……"))
-	local robotword = string.format("\27[36m(机器人声音)经测试你的阵营值是 %s……\27[0m",-100)
-	print(robotword)
-	self:delay(1.3)
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)感觉你这样的路人在学院都市中活不过1 ……"))
-	self:delay(1.3)
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(你狠狠地踹了测试机器一脚!!)"))
-	self:delay(1.3)
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)嘟…嘟嘟……嘟……"))
-	self:delay(1.3)
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)系统……故…障……遭到……破…坏……"))
-	self:delay(1.3)
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(警报声响起!你慌忙朝门口跑去……)"))
-	self:delay(1.3+1.3)
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)开始学园都市人格测试……\n"))
+	if not SUPERDEBUG then 
+		for i,v in ipairs(MENTALITY) do 
+			print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,i .. "、" .. v[1]))
+			print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"① 是\n② 否"))
+			local men_ans = self:getinput()
+			if men_ans == 1 then 
+				law = law + v[2]
+				good = good +v[3]
+			elseif men_ans ==2 then
+				law = law -v[2]
+				good = good -v[3]
+			else
+				law = law - 20
+				good = good -20
+			print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)怀疑你是智障……"))
+			end
+			print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"\n(机器人声音)读取下一题……"))
+			self:delay(COMMONDELAY)
+		end
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)测试完毕……"))
+		local robotword = string.format("\27[36m(机器人声音)经测试你的阵营值是 %s……\27[0m",-100)
+		print(robotword)
+		self:delay(COMMONDELAY)
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)感觉你这样的路人在学院都市中活不过1 ……"))
+		self:delay(COMMONDELAY)
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(你狠狠地踹了测试机器一脚!!)"))
+		self:delay(COMMONDELAY)
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)嘟…嘟嘟……嘟……"))
+		self:delay(COMMONDELAY)
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)系统……故…障……遭到……破…坏……"))
+		self:delay(COMMONDELAY)
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(警报声响起!你慌忙朝门口跑去……)"))
+		self:delay(COMMONDELAY+COMMONDELAY)
+	end
 	--保存生成的属性
 	self.roleattr = {level=1,name=name,body = body,con=con,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,law=law,good=good}
 	self.role = self:unitborn(self.roleattr)
@@ -197,7 +206,7 @@ function academy:createrole()
 	self.role:addskill(SKILL_NATT_NAME)
 	self.role:addskill("超电磁炮")
 	print(ANSI_RESET_CLEAR)
-	return self:levelstart(1)
+	return self:levelstart(FIRSTLEVEL)
 end 
 
 --剧情播放
@@ -208,12 +217,15 @@ function academy:storyplay(story_t,id)
 	--在剧情里面
 	local story = story_t
 	local id = id or 1
+	if id == 1 then 
+		print(story.before)
+	end
 	if id > #story then
-		self:delay(1.3)
+		self:delay(COMMONDELAY)
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":" .. story.pass))
-		self:delay(1.3)
+		self:delay(COMMONDELAY)
 		return STORY_RESULT_PASS
-	elseif id < 4 or story.func(self) then 				--跳过前3次对话的判断
+	elseif id < 5 or story.func(self) then 				--跳过前3次对话的判断
 		--显示怪物说的话,现将所有对话都存进一个表
 		local dialog = {}
 		for i,v in ipairs(story[id]) do 
@@ -227,7 +239,7 @@ function academy:storyplay(story_t,id)
 		end
 		--开始逐步显示dialog,先显示怪物说的话,稍等后再显示选择
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":".. dialog[1]))
-		self:delay(1.3)
+		self:delay(COMMONDELAY)
 		for i,v in ipairs(dialog) do 
 			if i >1 then 
 				print(v)
@@ -248,9 +260,9 @@ function academy:storyplay(story_t,id)
 		--符合条件继续进行下一个
 		return self:storyplay(story,id+1)
 	else 
-		self:delay(1.3)
+		self:delay(COMMONDELAY)
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":" .. story.fight))
-		self:delay(1.3+1.3)
+		self:delay(COMMONDELAY+COMMONDELAY)
 		return STORY_RESULT_FIGHT
 	end
 end
@@ -357,7 +369,7 @@ function academy:fight()
 		self.monster.think(self)
 		self:delay(1)
 	end
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"\n\n正在打扫战场……"))
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"\n\n上吧!下一回合要开始了!"))
 	self:delay(1.5)
 	print(ANSI_RESET_CLEAR)
 	return self:fight() 
@@ -393,7 +405,7 @@ function academy:levelstart(levelid)
 		elseif fight_result==FIGHT_RESULT_LOSE then
 			print(string.format(STR_COLOR_FORMAT,STR_COLOR_RED,"战斗失败,你得到了一次惨烈的教训……"))
 			self.losetimes = (self.losetimes or 0) +1 			--战斗失败次数+1
-			self:delay(1.3+1.3)
+			self:delay(COMMONDELAY+COMMONDELAY)
 			return self:restart()
 		end
 	end
@@ -450,7 +462,7 @@ function academy:levelpass(curlevelid)
 		until #realloot == 0
 	end
 	--开始下一关
-	self:delay(1.3)
+	self:delay(COMMONDELAY)
 	self:levelstart(curlevelid+1)
 
 end
@@ -496,7 +508,7 @@ function academy:startgame()
 	print(ANSI_RESET_CLEAR)
 	print(WELCOME)
 	self.level = self:getconfig("academy")
-	self:delay(5)
+	--self:delay(5)
 	self:createrole()
 end
 
