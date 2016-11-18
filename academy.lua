@@ -8,7 +8,7 @@ require("tuning")
 require("debugfunc")
 SUPERDEBUG = true
 COMMONDELAY = COMMONDELAY -1
-FIRSTLEVEL = 1
+FIRSTLEVEL = 2
 skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
 local fight = require("fight")
 local base_mt = require("base")
@@ -131,7 +131,7 @@ function academy:createrole()
 	until conplv+spirplv+agilplv <= MAX_ATTR_GAIN
 	
 	--指定角色名
-	local name = "小栗优一"
+	local name = "优一酱"
 	local ccccol = {32,36,33}
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,name .. "?你确定以下面的属性开始游戏吗?"))
 	print(string.format("\27[32m基础体质:%s \27[36m基础精神:%s \27[33m基础敏捷:%s \n\27[32m体质成长:%s \27[36m精神成长:%s \27[33m敏捷成长:%s ",con,spir,agil,conplv,spirplv,agilplv))
@@ -387,7 +387,7 @@ function academy:levelstart(levelid)
 
 	local col_name1 = string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,self.role.name) 		--人物形象。。
 	local col_name2 = string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name)
-	local nameoutput = string.format("%s%s%s",col_name1,string.rep(utf8.char(32),32),col_name2)
+	local nameoutput = string.format("%s%s%s",col_name1,string.rep(utf8.char(32),36),col_name2)
 	print(nameoutput) 
 	print(self.role.body)
 	self.story = level.story 		
@@ -460,6 +460,8 @@ function academy:levelpass(curlevelid)
 				end
 			end
 		until #realloot == 0
+	elseif SUPERDEBUG then
+		print("这一关没有掉落")
 	end
 	--开始下一关
 	self:delay(COMMONDELAY)
