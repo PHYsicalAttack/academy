@@ -51,6 +51,8 @@ STR_COLOR_WHITE = 37 				--白色
 ANSI_CLEAR = "\27[2J"
 ANSI_RESET_CLEAR ="\27[2J\27[H"
 ANSI_POS = "\27[%d;%dH%s"
+ANSI_CLEAR_CURL = "\027[K"
+ANSI_MOVE_LEFT = "\027[nD"
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 120
 
@@ -63,6 +65,7 @@ ERROR_MAX_SKILL_NUM = "\27[31m你已拥有太多技能\27[0m"
 ERROR_DELETE_SKILL_NORM = "\27[31m你无法删除普通攻击\27[0m"
 ERROR_DELETE_SKILL	="\27[31m删除技能失败-未拥有该技能或其他未知原因\27[0m"
 ERROR_SAME_SKILL = "\27[31m你已拥有这个技能\27[0m"
+ERROR_NULL_SKILL = "\27[31m你已拥有这个技能\27[0m"
 ERROR_UNKNOW_DMGTYPE = "\27[31m未知伤害类型\27[0m"
 ERROR_NOT_ENOUGH_MP = "\27[31m由于魔法值不足,可怜的你并没有放出任何技能……\27[0m"
 ERROR_PASSIVE_SKILL = "\27[31m你不能使用一个被动技能\27[0m"
@@ -108,3 +111,11 @@ MENTALITY={
 [12] = {"你愿意加入lvl超能力科学研究集团吗?",-10,-10},
 [13] = {"你是否愿意将测试结果保密?",10,10}
 }
+--[[
+Level 6 绝对能力者 200点满点 “以非神之躯，抵达神之领域者”，尚无人达到。 
+Level 5 超能力者 199~190点 能单独对抗一个军队的程度。仅7人，但不乏其他有可能成为LV.5的人。 
+Level 4 大能力者 189~150点 在军队中体现战术价值的程度。 
+Level 3 强能力者 149~110点 日常生活中能得到活用、带来方便的程度。 
+Level 2 异能力者 109~70点 稍微比Level 1有用的程度。 
+Level 1 低能力者 69~30点 能勉强弄弯汤匙的程度，对日常生活基本没有帮助。 
+Level 0 无能力者 29~0点 无法测量或效果极其微弱的能力。占全部学生60%]]

@@ -139,8 +139,13 @@ function base_mt:addskill(skillname)
 		print(ERROR_MAX_SKILL_NUM)
 		return false
 	else
-		self.skill[#self.skill+1] = skill[skillname]
-		return true
+		if skill[skillname] then 
+			self.skill[#self.skill+1] = skill[skillname]
+			return true
+		else 
+			print(ERROR_NULL_SKILL)
+			return false
+		end
 	end
 end
 

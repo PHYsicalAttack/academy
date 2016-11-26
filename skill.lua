@@ -50,6 +50,22 @@ smallfire.func = function (caster,target)
 	target:applydmg({attacker,damage,damagetype})
 end
 
+--[[第二关技能]]
+local mindwater ={}
+mindwater.name = "意念之水"
+mindwater.coast = 5
+mindwater.desc = "通过意念使对方身体布满水珠,降低其少许速度值"
+skill[mindwater.name] = mindwater
+mindwater.func= function (caster,target)
+	local mus_speed = 5
+	local col_losehp= string.format(STR_COLOR_FORMAT,STR_COLOR_RED,truedmg)
+	local col_victimname= string.format(STR_COLOR_FORMAT,STR_COLOR_RED,self.name)
+	local applydmgword =  string.format("%s受到了%s点伤害",col_victimname,col_losehp)
+	print(applydmgword)
+end
+
+
+
 
 --[[炮姐技能:超电磁炮、]]
 --超电磁炮

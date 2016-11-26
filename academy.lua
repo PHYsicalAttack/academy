@@ -7,8 +7,10 @@ package.path = package.path ..";" .. pwd .. "/" .."?.lua"
 require("tuning")
 require("debugfunc")
 SUPERDEBUG = true
-COMMONDELAY = COMMONDELAY -1
-FIRSTLEVEL = 2
+if SUPERDEBUG then 
+	COMMONDELAY = COMMONDELAY -1
+	FIRSTLEVEL = 3
+end
 skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
 local fight = require("fight")
 local base_mt = require("base")
@@ -211,60 +213,61 @@ end
 
 --剧情播放
 function academy:storyplay(story_t,id)
-	do 
-		--return STORY_RESULT_FIGHT
-	end
-	--在剧情里面
 	local story = story_t
 	local id = id or 1
-	if id == 1 then 
-		print(story.before)
+	self.role.curstoryid = id  		 		--//保存当前对话id，用于storyfunc
+	if id == 1 then 						--剧情before
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_WHITE,story.before .."\n"))
 	end
-	if id > #story then
+	if id > #story then 					--已经播放完所有的剧情，则pass
 		self:delay(COMMONDELAY)
-		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":" .. story.pass))
+		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":" .. story.pass .. "\n"))
 		self:delay(COMMONDELAY)
 		return STORY_RESULT_PASS
-	elseif id < 5 or story.func(self) then 				--跳过前3次对话的判断
-		--显示怪物说的话,现将所有对话都存进一个表
-		local dialog = {}
-		for i,v in ipairs(story[id]) do 
-			if type(v) == "string" then 
-				dialog[#dialog+1] = v 
-			elseif  type(v) == "table" then 
-				dialog[#dialog+1] = string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,SERIAL[i-1] ..string.char(SPACE) ..  v[1])
-			else
-				print(ERROR_INVALID_CONFIG)
-			end
-		end
-		--开始逐步显示dialog,先显示怪物说的话,稍等后再显示选择
-		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":".. dialog[1]))
-		self:delay(COMMONDELAY)
-		for i,v in ipairs(dialog) do 
-			if i >1 then 
-				print(v)
-			end
-		end
-		--显示完毕，获取玩家输入，计算
-		local tem 
-		repeat 
-			if tem then 
-				print(ERROR_INPUT_OUTOF_RANGE)
-			end
-			tem = self:getinput()
-		until story[id][tem+1]
-		local choice = tem + 1 				--实际内容是输入+1表中的值
-		local change_law,change_good = story[id][choice][2],story[id][choice][3]
-		self.role.law = self.role.law + change_law
-		self.role.good = self.role.good + change_good
-		--符合条件继续进行下一个
-		return self:storyplay(story,id+1)
-	else 
-		self:delay(COMMONDELAY)
-		print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":" .. story.fight))
-		self:delay(COMMONDELAY+COMMONDELAY)
-		return STORY_RESULT_FIGHT
 	end
+	local dialog = {}
+	for i,v in ipairs(story[id]) do 
+		if type(v) == "string" then 
+			dialog[#dialog+1] = v 
+		elseif  type(v) == "table" then 
+			dialog[#dialog+1] = string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,SERIAL[i-1] ..string.char(SPACE) ..  v[1])
+		else
+			print(ERROR_INVALID_CONFIG)
+		end
+	end
+	--开始逐步显示dialog,先显示怪物说的话,稍等后再显示选择
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":".. dialog[1]))
+	self:delay(COMMONDELAY)
+	for i,v in ipairs(dialog) do 
+		if i >1 then 
+			print(v)
+		end
+	end
+	
+	local tem 										--显示完毕，获取玩家输入，计算
+	repeat 
+		if tem then 
+			print(ERROR_INPUT_OUTOF_RANGE)	--符合条件继续进行下一个
+		end
+		tem = self:getinput()
+	until story[id][tem+1]
+	local choice = tem + 1 							--实际内容是输入+1表中的值
+	local change_law,change_good = story[id][choice][2],story[id][choice][3]
+	self.role.lastchoice = tem 						--//保存最后一次选择的值，用于storyfunc
+	self.role.law = self.role.law + change_law		--//更新秩序值
+	self.role.good = self.role.good + change_good	--//更新善良值
+	--id <4的忽略播放规则
+	if id <4 then 
+		return self:storyplay(story,id+1)
+	end
+	--符合条件继续进行下一个
+	if story.func(self) then 
+		return self:storyplay(story,id+1)
+	end
+	self:delay(COMMONDELAY)
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.monster.name .. ":" .. story.fight))
+	self:delay(COMMONDELAY+COMMONDELAY)
+	return STORY_RESULT_FIGHT
 end
 
 --每次进入关卡后刷新角色战斗属性,并去掉所有modifier。开战斗前调用来释放怪物被动？
