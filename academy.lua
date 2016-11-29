@@ -9,7 +9,7 @@ require("debugfunc")
 SUPERDEBUG = true
 if SUPERDEBUG then 
 	COMMONDELAY = COMMONDELAY -1
-	FIRSTLEVEL = 3
+	FIRSTLEVEL = 4
 end
 skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
 local fight = require("fight")
@@ -36,6 +36,7 @@ function academy:getinput()
 		input = io.read()
 		if input == "myinfo" then dump(self.role) end
 		if input == "moninfo" then dump(self.monster) end
+	--	if string.find("func_",input) then load(string.sub(input,6))() end
 		input = tonumber(input)
 	until input
 	return math.floor(input)
