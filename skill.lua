@@ -51,10 +51,11 @@ smallfire.func = function (caster,target)
 end
 
 --[[第二关技能]]
+--意念之光
 local mindwater ={}
-mindwater.name = "意念之水"
+mindwater.name = "意念之光"
 mindwater.coast = 5
-mindwater.desc = "通过意念使对方身体布满水珠,降低其少许速度值"
+mindwater.desc = "控制身体周围的光能量场,使敌人无法准确命中自己"
 skill[mindwater.name] = mindwater
 mindwater.func= function (caster,target)
 	local mus_speed = 5
@@ -64,7 +65,52 @@ mindwater.func= function (caster,target)
 	print(applydmgword)
 end
 
+--[[第四关获得的技能]]
+--聚合光束
+local conlight = {}
+conlight.name = "聚合光束"
+conlight.cost = 15
+conlight.desc = "伤害并致盲"
+skill[conlight.name] = conlight
+conlight.func = function (caster,target)
 
+end
+--奇异光芒
+local magiclight = {}
+magiclight.name = "奇异光芒"
+magiclight.cost = 15
+magiclight.desc = "提升闪避"
+skill[magiclight.name] = magiclight
+magiclight.func = function (caster,target)
+
+end
+--光之耀
+local shinelight = {}
+shinelight.name = "光之耀"
+shinelight.cost = 15
+shinelight.desc = "提升魔法伤害"
+skill[shinelight.name] = shinelight
+shinelight.func = function (caster,target)
+
+end
+--穿透光束
+local riftlight = {}
+riftlight.name = "穿透光束"
+riftlight.cost = 15
+riftlight.desc = "伤害并致命"
+skill[riftlight.name] = riftlight
+riftlight.func = function (caster,target)
+
+end
+--光之匿
+local hidelight = {}
+hidelight.name = "光之匿"
+hidelight.cost = 15
+hidelight.desc = "完全免疫下次伤害"
+skill[hidelight.name] = hidelight
+hidelight.func = function (caster,target)
+
+end
 
 
 --[[炮姐技能:超电磁炮、]]

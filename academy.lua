@@ -9,7 +9,7 @@ require("debugfunc")
 SUPERDEBUG = true
 if SUPERDEBUG then 
 	COMMONDELAY = COMMONDELAY -1
-	FIRSTLEVEL = 4
+	FIRSTLEVEL = 5
 end
 skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
 local fight = require("fight")
@@ -257,7 +257,7 @@ function academy:storyplay(story_t,id)
 	self.role.lastchoice = tem 						--//保存最后一次选择的值，用于storyfunc
 	self.role.law = self.role.law + change_law		--//更新秩序值
 	self.role.good = self.role.good + change_good	--//更新善良值
-	--id <4的忽略播放规则
+	--id <4的忽略播放规则,至少会播放4段对话。
 	if id <4 then 
 		return self:storyplay(story,id+1)
 	end
