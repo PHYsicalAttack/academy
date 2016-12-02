@@ -173,6 +173,12 @@ end
 --add modifier
 function base_mt:addmodifier(modname,durationtime)
 	local modifier = skill:getmodifier(modname)
+	--buff立即生效
+	for k,v in pairs(modifier) do 
+		if k ~= "name" then
+			self:buffattr(k,v)
+		end
+	end
 	--获得modifier打印
 	local col_name= string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,self.name)
 	local col_modifier = string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,modname)

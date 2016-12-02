@@ -13,8 +13,8 @@ end
 modifier["失明"] = {name="失明",accu = -50} 					--失明效果
 modifier["光之影"] = {name="光之影",miss = 5}
 modifier["光之耀"] = {name ="光之耀",satt = 1}
-modifier["光之匿"] = {name =光之匿,sdef =999,ndef=999}
-
+modifier["光之匿"] = {name ="光之匿",sdef =999,ndef=999}
+modifier["浮空式"] = {name ="浮空式",bspd = 10,miss = 10}
 
 --普通攻击
 local noratt = {}
@@ -69,12 +69,28 @@ end
 --意念之光
 local mindwater ={}
 mindwater.name = "意念之光"
-mindwater.coast = 5
+mindwater.cost = 5
 mindwater.desc = "控制周围光场使敌人无法命中自己,接下来的4回合额外提升5点闪避"
 skill[mindwater.name] = mindwater
 mindwater.func= function (caster,target)
 	caster:addmodifier("光之影",4)
 end
+
+--[[第三关技能]]
+--飞沙
+local windsand ={}
+windsand.name = "飞沙"
+windsand.cost = 10
+windsand.desc = "用卷有沙石的旋风袭击敌人,造成等于魔法攻击力的伤害"
+skill[windsand.name] = windsand
+windsand.func= function (caster,target)
+	local attacker = caster
+	local damage = caster.satt
+	local damagetype = SATT
+	target:applydmg({attacker,damage,damagetype})
+end
+
+
 
 --[[第四关获得的技能]]
 --聚合光束
@@ -98,7 +114,7 @@ end
 local shinelight = {}
 shinelight.name = "光之耀"
 shinelight.cost = 5
-shinelight.desc = "光的能量充盈着你的身体,是自己在接下来的2回合中魔法攻击力翻倍"
+shinelight.desc = "光的能量充盈着你的身体,使自己在接下来的2回合中魔法攻击力翻倍"
 skill[shinelight.name] = shinelight
 shinelight.func = function (caster,target)
 	caster:addmodifier("光之耀",2)
@@ -127,6 +143,63 @@ skill[hidelight.name] = hidelight
 hidelight.func = function (caster,target)
 	caster:addmodifier("光之匿",1)
 end
+--[[第五关boss技能弄死你 你不可能通过第五关]]
+--空气炮
+local hidelight = {}
+hidelight.name = "空气炮"
+hidelight.cost = 10
+hidelight.desc = "迅速压缩面前至目标空气并释放来造成伤害,距离目标越近伤害越高"
+skill[hidelight.name] = hidelight
+hidelight.func = function (caster,target)
+	local attacker = caster
+	local dmgratio = math.min(100/math.abs(caster.bpos - target.bpos),4)
+	local damage = math.floor(caster.satt*dmgratio)
+	local damagetype = SATT
+	target:applydmg({attacker,damage,damagetype})
+end
+--投石
+local throwstone = {}
+throwstone.name = "抛物式"
+throwstone.cost = 15
+throwstone.desc = "空力使将巨大的物体扔向敌人,可造成大量普通伤害,距离目标越近伤害越高"
+skill[throwstone.name] = throwstone
+throwstone.func = function (caster,target)
+	local attacker = caster
+	local dmgratio = math.min(100/math.abs(caster.bpos - target.bpos),4)
+	local damage = math.floor(caster.natt*dmgratio)
+	local damagetype = NATT
+	target:applydmg({attacker,damage,damagetype})
+end
+--浮空式
+local throwstone = {}
+throwstone.name = "浮空式"
+throwstone.cost = 5
+throwstone.desc = "空力使改变自身重力,行动更加敏捷,增加自身10点战斗速度和10点闪避4回合"
+skill[throwstone.name] = throwstone
+throwstone.func = function (caster,target)
+	caster:addmodifier("浮空式",4)
+end
+--重力逆转
+local absgravity = {}
+absgravity.name = "重力逆转"
+absgravity.cost = 5
+absgravity.desc = "空力使临时反方向改变敌人周围的重力场,使敌人飞向高空后摔落,有几率失败"
+skill[absgravity.name] = absgravity
+absgravity.func = function (caster,target)
+	local attacker = caster
+	local damage =100
+	while math.random(100)<=10 do
+		damage = damage*damage
+	end
+	if math.random(100)<=10 then
+		damage=0
+	end
+	local damagetype=NATT
+	target:applydmg({attacker,damage,damagetype})
+end
+
+
+
 
 --[[炮姐技能:超电磁炮、]]
 --超电磁炮
@@ -147,6 +220,7 @@ railgun.func = function (caster,target)
 	local totaldmg = basedmg + damage
 	target:applydmg({attacker,totaldmg,damagetype})
 end
+
 
 --[[一方通行技能:反射、xxxxx、xxxxxxx]]
 --反射

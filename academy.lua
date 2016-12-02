@@ -7,7 +7,7 @@ require("tuning")
 SUPERDEBUG = true
 if SUPERDEBUG then 
 	COMMONDELAY = COMMONDELAY -1
-	FIRSTLEVEL = 1
+	FIRSTLEVEL = 3
 end
 require("debugfunc")
 skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
@@ -186,6 +186,7 @@ function academy:createrole()
 			end
 			print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"\n(机器人声音)读取下一题……"))
 			self:delay(COMMONDELAY)
+			print(ANSI_RESET_CLEAR)
 		end
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"(机器人声音)测试完毕……"))
 		local robotword = string.format("\27[36m(机器人声音)经测试你的阵营值是 %s……\27[0m",-100)
@@ -206,9 +207,8 @@ function academy:createrole()
 	self.roleattr = {level=1,name=name,body = body,con=con,spir=spir,agil=agil,conplv=conplv,spirplv=spirplv,agilplv=agilplv,law=law,good=good}
 	self.role = self:unitborn(self.roleattr)
 	--生成角色时增加普通攻击
-	--self.role.skill = nil 
 	self.role:addskill(SKILL_NATT_NAME)
-	if SUPERDEBUG then 	self.role:addskill("超电磁炮") end 
+	if SUPERDEBUG then 	self.role:addskill("意念之光") end 
 	print(ANSI_RESET_CLEAR)
 	return self:levelstart(FIRSTLEVEL)
 end 
@@ -252,7 +252,7 @@ function academy:storyplay(story_t,id)
 			print(ERROR_INPUT_OUTOF_RANGE)	--符合条件继续进行下一个
 		end
 		tem = self:getinput()
-	until story[id][tem+1]
+	until (story[id][tem+1] and tem>0)
 	local choice = tem + 1 							--实际内容是输入+1表中的值
 	local change_law,change_good = story[id][choice][2],story[id][choice][3]
 	self.role.lastchoice = tem 						--//保存最后一次选择的值，用于storyfunc
@@ -344,12 +344,11 @@ function academy:dealmodifier()
 	--如果bufftime是-1说明buff应该被清空,并还原属性
 	while true do 
 		local len_t = #self.role.bufftime
-		print(len_t)
 		for i = 1,#self.role.buffs,1 do
 			if bufftime == -1 then 
 				local remodid = i
 				for k,v in pairs(self.role.buffs[remodid]) do
-					if k ~= name then 
+					if k ~= "name" then 
 						self.role:revertattr(k,v)
 					end
 				end
@@ -361,7 +360,7 @@ function academy:dealmodifier()
 	--角色属性值处理
 	for i = 1,#self.role.buffs,1 do 
 		for k,v in pairs(self.role.buffs[i]) do
-			if k ~= name then 
+			if k ~= "name" then 
 				self.role:revertattr(k,v)
 				self.role:buffattr(k,v)
 			end
@@ -374,7 +373,7 @@ function academy:dealmodifier()
 			if bufftime == -1 then 
 				local remodid = i
 				for k,v in pairs(self.monster.buffs[remodid]) do
-					if k ~= name then 
+					if k ~= "name" then 
 						self.monster:revertattr(k,v)
 					end
 				end
@@ -386,7 +385,7 @@ function academy:dealmodifier()
 	--怪物属性值处理
 	for i = 1,#self.monster.buffs,1 do 
 		for k,v in pairs(self.monster.buffs[i]) do
-			if k ~= name then 
+			if k ~= "name" then 
 				self.monster:revertattr(k,v)
 				self.monster:buffattr(k,v)
 			end
@@ -539,8 +538,6 @@ function academy:levelpass(curlevelid)
 	self:levelstart(curlevelid+1)
 
 end
-
-
 
 --re0
 function academy:restart()
