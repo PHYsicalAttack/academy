@@ -1,5 +1,5 @@
 --角色方法表
-local base_mt = {level=0,exp=0,hp=200,mp=50,natt=20,ndef=0,satt=0,sdef=0,bpos=0,bspd=0,accu=0,miss=0,crit=0,skill={},buffround={},name ="name",law=0,good=0}
+local base_mt = {level=0,exp=0,hp=200,mp=50,natt=20,ndef=0,satt=0,sdef=0,bpos=0,bspd=0,accu=0,miss=0,crit=0,skill={},buffs={},bufftime={},name ="name",law=0,good=0}
 base_mt.__index = base_mt
 
 --获取某项
@@ -38,16 +38,16 @@ function base_mt:applydmg(t_dmg)
 	local truedmg
 	if damagetype == NATT then 
 		--普攻会计算闪避
-		if math.random(100) <=self.miss then
+		if math.random(100+attacker.accu) <=self.miss then
 			print(FIGHT_MISS)
 			truedmg = 0
 		else 
-			truedmg = damage - self.ndef
+			truedmg = math.max(damage - self.ndef,0)
 		end
 		self.hp = self.hp - truedmg
 	elseif damagetype == SATT then 
 		truedmg = damage - self.sdef
-		self.hp = self.hp - truedmg
+		self.hp = math.min(self.hp - truedmg)
 	else 
 		print(ERROR_UNKNOW_DMGTYPE)
 		return false
@@ -169,19 +169,65 @@ function base_mt:removeskill(skillname)
 
 end
 
+--add 和 remove 是一对姐妹函数,注意table插入和删除方法
 --add modifier
-function base_mt:addmodifier(caster,modifiername,durationtime)
-	local modifier = getmodifier(modifiername)
-	
-	-- body
+function base_mt:addmodifier(modname,durationtime)
+	local modifier = skill:getmodifier(modname)
+	--获得modifier打印
+	local col_name= string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,self.name)
+	local col_modifier = string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,modname)
+	local castword = string.format("%s受到了[%s]效果",col_name,col_modifier)
+	print(castword)
+	table.insert(self.buffs,modifier)
+	table.insert(self.bufftime,durationtime)
+	if (#self.buffs ~= #self.bufftime) and SUPERDEBUG then 
+		print("buff数量和buff时间不一致")
+	end
+	return true
 end
 
---removemodifier
-function base_mt:removemodifier(modname)
-	-- body
+--removemodifier 
+function base_mt:removemodifier(modid)
+	--失去modifier打印
+	local col_name= string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,self.name)
+	local col_modifier = string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,self.buffs[modid].name)
+	local castword = string.format("%s失去了[%s]效果",col_name,col_modifier)
+	print(castword)	
+	table.remove(self.buffs,modid)
+	table.remove(self.bufftime,modid)
+	if SUPERDEBUG  and  (#self.buffs ~= #self.bufftime)then 
+		print("buff数量和buff时间不一致")
+	end
+	return true 
 end
 
+--decrease all bufftime
+function base_mt:decbufftime()
+	for i = 1,#self.bufftime do 
+		self.bufftime[i] = self.bufftime[i] -1
+	end
+	if SUPERDEBUG then 
+		print(self.name .. ":所有buff持续时间减1")
+	end
+	return true
+end
 
+--还原buff属性
+function base_mt:revertattr(attrname,value)
+	if value>1 or value <-1 then
+		self[attrname] = self[attrname] -value					 	--数值buff
+	else
+		self[attrname] = math.ceil(self[attrname]/(1+value))	    --百分比buff
+	end
 
+end
+--增加buff属性,暂时不弄buff基础属性的试试
+function base_mt:buffattr(attrname,value)
+	if value>1 or value<-1 then 
+		self[attrname] = self[attrname] +value 						--数值buff
+	else 
+		self[attrname] = math.floor(self[attrname]*(1+value))		--百分比buff
+	end
+end
 
 return base_mt

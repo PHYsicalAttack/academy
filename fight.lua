@@ -13,4 +13,17 @@ function fight:battlespeed(role,monster)
 	return self:battlespeed(role,monster)
 end
 
+function fight:getrounds(id)
+	local id =id or 1
+	local ans = 0
+	if 1==id then 
+		ans = academy.battlerounds
+	elseif 2 ==id then 
+		ans = academy.rolerounds
+	elseif 3 ==id then
+		ans = academy.monsterrounds
+	end
+	return ans
+end
+
 return fight

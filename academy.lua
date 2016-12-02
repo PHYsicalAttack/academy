@@ -1,16 +1,15 @@
 academy ={}
 --全局设置
 math.randomseed(os.time())
-
 local pwd = string.sub(io.popen("pwd"):read("*a"),1,-2) 
 package.path = package.path ..";" .. pwd .. "/" .."?.lua"
 require("tuning")
-require("debugfunc")
 SUPERDEBUG = true
 if SUPERDEBUG then 
 	COMMONDELAY = COMMONDELAY -1
-	FIRSTLEVEL = 5
+	FIRSTLEVEL = 1
 end
+require("debugfunc")
 skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
 local fight = require("fight")
 local base_mt = require("base")
@@ -68,6 +67,8 @@ function academy:unitborn(t)
 	local unit = t or {}
 	--单独将skill表等插入unit不从元表继承那个skill空表。
 	unit.skill = unit.skill or {}
+	unit.buffs =  {}
+	unit.bufftime = {}
 	setmetatable(unit,base_mt)
 	--这儿写一些熟悉计算的公式，怪物的话应该没有基础属性，并且lv=0,如果不是1则认为是角色。
 	--另外没有的属性会从元表继承
@@ -207,7 +208,7 @@ function academy:createrole()
 	--生成角色时增加普通攻击
 	--self.role.skill = nil 
 	self.role:addskill(SKILL_NATT_NAME)
-	self.role:addskill("超电磁炮")
+	if SUPERDEBUG then 	self.role:addskill("超电磁炮") end 
 	print(ANSI_RESET_CLEAR)
 	return self:levelstart(FIRSTLEVEL)
 end 
@@ -288,6 +289,8 @@ function academy:refresh(level)
 		unit.miss = math.floor(unit.agil+(unit.level-1)*unit.agilplv)*MISS_PER_AGIL
 		unit.crit = math.floor(unit.agil+(unit.level-1)*unit.agilplv)*CRIT_PER_AGIL
 		unit.bpos = 0
+		unit.buffs= {}
+		unit.bufftime = {} 
 	end 
 	--刷新怪物数据从关卡配置中复制属性数据
 	local temp = {}
@@ -332,6 +335,65 @@ function academy:checkattr()
 
 end
 
+--每次调用acamemy:fight的时候来处理modifier修饰属性
+function academy:dealmodifier()
+	if #self.role.buffs ~= #self.role.bufftime or #self.monster.buffs ~= #self.monster.bufftime then 
+		print(ERROR_UNEQUAL_BUFF)
+	end
+	--处理角色mod
+	--如果bufftime是-1说明buff应该被清空,并还原属性
+	while true do 
+		local len_t = #self.role.bufftime
+		print(len_t)
+		for i = 1,#self.role.buffs,1 do
+			if bufftime == -1 then 
+				local remodid = i
+				for k,v in pairs(self.role.buffs[remodid]) do
+					if k ~= name then 
+						self.role:revertattr(k,v)
+					end
+				end
+				self.role:removemodifier(remodid)
+			end
+		end
+		if len_t == #self.role.bufftime then break end
+	end
+	--角色属性值处理
+	for i = 1,#self.role.buffs,1 do 
+		for k,v in pairs(self.role.buffs[i]) do
+			if k ~= name then 
+				self.role:revertattr(k,v)
+				self.role:buffattr(k,v)
+			end
+		end
+	end
+	--处理怪物mod
+	while true do 
+		local len_t = #self.monster.bufftime
+		for i = 1,#self.monster.buffs,1 do
+			if bufftime == -1 then 
+				local remodid = i
+				for k,v in pairs(self.monster.buffs[remodid]) do
+					if k ~= name then 
+						self.monster:revertattr(k,v)
+					end
+				end
+				self.monster:removemodifier(remodid)
+			end
+		end
+		if len_t == #self.monster.bufftime then break end
+	end
+	--怪物属性值处理
+	for i = 1,#self.monster.buffs,1 do 
+		for k,v in pairs(self.monster.buffs[i]) do
+			if k ~= name then 
+				self.monster:revertattr(k,v)
+				self.monster:buffattr(k,v)
+			end
+		end
+	end
+end
+
 --战斗是宠物小精灵xy
 function academy:fight()
 	if self.role:isdie() then 			--玩家死亡
@@ -340,6 +402,7 @@ function academy:fight()
 		return FIGHT_RESULT_WIN
 	end
 	print(ANSI_RESET_CLEAR)
+	self:dealmodifier()				    --处理buff函数
 	self.battlerounds = self.battlerounds + 1
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"第" .. self.battlerounds .."回合"))
 	--回复魔法值计算
@@ -353,6 +416,7 @@ function academy:fight()
 	--如果是真，则让玩家采取行动，否则怪物AI
 	local battleturn = fight:battlespeed(self.role,self.monster)
 	if battleturn == true  then
+    	self.rolerounds = self.rolerounds+1
     	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"请选择下一步行动:"))
 		self:actlist()
 		local actionid 
@@ -362,15 +426,16 @@ function academy:fight()
 			end
 			actionid = self:getinput()
 		until self.role.skill[actionid]
-		--技能选择目标，拙略的
-		local target = self.monster
-		self.role:castskill(self.role.skill[actionid].name,target)
+		self.role:castskill(self.role.skill[actionid].name,self.monster)
+		self.role:decbufftime()			--buff回合-1
 	else
+		self.monsterrounds = self.monsterrounds+1
 		local delaytime = 1+math.random()*2
 		local thinkword = string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,self.monster.name .. "正在考虑下一步行动……")
 		print(thinkword)
 		self:delay(delaytime)
 		self.monster.think(self)
+		self.monster:decbufftime() 		--buff回合-1
 		self:delay(1)
 	end
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"\n\n上吧!下一回合要开始了!"))
@@ -385,8 +450,8 @@ function academy:levelstart(levelid)
 	--生成基本信息
 	local level = self.level[levelid]
 	self:refresh(level)
-	print(ANSI_RESET_CLEAR)	
 	local level_title = string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"第".. levelid .. "关  " ..level.name)
+	print(ANSI_RESET_CLEAR)	
 	print(level_title)
 
 	local col_name1 = string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,self.role.name) 		--人物形象。。
@@ -401,7 +466,9 @@ function academy:levelstart(levelid)
 		return self:levelpass(levelid)
 	elseif story_result == STORY_RESULT_FIGHT then
 		--[[self.battlerounds是记录的self:fight调用次数,意思是role或者monster每出手一次,rounds就会+1]]
-		self.battlerounds = 0 
+		self.battlerounds = 0 									--初始化总回合数
+		self.rolerounds = 0 									--初始化角色回合数
+		self.monsterrounds = 0 									--初始化怪物回合数
 		local fight_result =  self:fight()
 		if fight_result == FIGHT_RESULT_WIN then 
 			self.wintimes = (self.wintimes or 0) +1 			--战斗胜利次数+1
