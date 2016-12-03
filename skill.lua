@@ -36,7 +36,7 @@ end
 --强力击
 local poweratt = {}
 poweratt.name = "强力击"
-poweratt.cost = 5
+poweratt.cost = 10
 poweratt.desc = "强力攻击,造成2倍于攻击力的普攻伤害"
 skill[poweratt.name] = poweratt
 poweratt.func = function (caster,target)
@@ -53,7 +53,7 @@ end
 --小型火焰
 local smallfire ={}
 smallfire.name = "操纵火焰"
-smallfire.cost = 5
+smallfire.cost = 10
 smallfire.desc = "操纵小型火焰攻击敌人,造成14+自身魔法攻击力的魔法伤害"
 skill[smallfire.name] = smallfire
 smallfire.func = function (caster,target)
@@ -70,7 +70,7 @@ end
 local mindwater ={}
 mindwater.passive =true
 mindwater.name = "意念之光"
-mindwater.cost = 5
+mindwater.cost = 10
 mindwater.desc = "控制周围光场使敌人无法命中自己,接下来的4回合额外提升5点闪避"
 skill[mindwater.name] = mindwater
 mindwater.func= function (caster,target)
@@ -97,7 +97,7 @@ end
 --聚合光束
 local conlight = {}
 conlight.name = "聚合光束"
-conlight.cost = 10
+conlight.cost = 20
 conlight.desc = "将光聚合成强烈的激光攻击敌人,造成2倍于魔法攻击力的伤害,有几率使敌人失明2回合"
 skill[conlight.name] = conlight
 conlight.func = function (caster,target)
@@ -115,7 +115,7 @@ end
 local shinelight = {}
 shinelight.passive = true
 shinelight.name = "光之耀"
-shinelight.cost = 5
+shinelight.cost = 15
 shinelight.desc = "光的能量充盈着你的身体,使自己在接下来的2回合中魔法攻击力翻倍"
 skill[shinelight.name] = shinelight
 shinelight.func = function (caster,target)
@@ -124,7 +124,7 @@ end
 --穿透光束
 local riftlight = {}
 riftlight.name = "穿透光束"
-riftlight.cost = 20
+riftlight.cost = 25
 riftlight.desc = "瞬间捕捉空间所有光线并聚合反射,形成具有极大杀伤力的激光造成致命一击"
 skill[riftlight.name] = riftlight
 riftlight.func = function (caster,target)
@@ -140,7 +140,7 @@ end
 local hidelight = {}
 hidelight.passive =true
 hidelight.name = "光之匿"
-hidelight.cost = 10
+hidelight.cost = 30
 hidelight.desc = "消失在光的保护之中,在下次行动之前免疫所有伤害"
 skill[hidelight.name] = hidelight
 hidelight.func = function (caster,target)
@@ -150,7 +150,7 @@ end
 --空气炮
 local hidelight = {}
 hidelight.name = "空气炮"
-hidelight.cost = 10
+hidelight.cost = 30
 hidelight.desc = "迅速压缩面前至目标空气并释放来造成伤害,距离目标越近伤害越高"
 skill[hidelight.name] = hidelight
 hidelight.func = function (caster,target)
@@ -163,7 +163,7 @@ end
 --投石
 local throwstone = {}
 throwstone.name = "抛物式"
-throwstone.cost = 15
+throwstone.cost = 20
 throwstone.desc = "空力使将巨大的物体扔向敌人,可造成大量普通伤害,距离目标越近伤害越高"
 skill[throwstone.name] = throwstone
 throwstone.func = function (caster,target)
@@ -178,7 +178,7 @@ end
 local upground = {}
 upground.passive = true
 upground.name = "浮空式"
-upground.cost = 5
+upground.cost = 10
 upground.desc = "空力使改变自身重力,行动更加敏捷,增加自身10点战斗速度和10点闪避4回合"
 skill[upground.name] = upground
 upground.func = function (caster,target)
@@ -187,7 +187,7 @@ end
 --重力逆转
 local absgravity = {}
 absgravity.name = "重力逆转"
-absgravity.cost = 5
+absgravity.cost = 25
 absgravity.desc = "空力使临时反方向改变敌人周围的重力场,使敌人飞向高空后摔落,有几率失败"
 skill[absgravity.name] = absgravity
 absgravity.func = function (caster,target)
@@ -210,7 +210,7 @@ end
 --超电磁炮
 local railgun = {}
 railgun.name = "超电磁炮"
-railgun.cost = 20
+railgun.cost = 50
 railgun.desc = "常盘台王牌lvl5超能力者-御坂美琴的招牌技能"
 skill[railgun.name] = railgun
 railgun.func = function (caster,target)
