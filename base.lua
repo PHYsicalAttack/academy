@@ -28,14 +28,9 @@ function base_mt:applydmg(t_dmg)
 	if self.bfapplydmg then 
 		self.bfapplydmg(t_dmg)
 	end
-	--[[local animation ={{4,4,"*"},{4,5,"*"},{4,6,"*"}}
-	for i,v in ipairs(animation) do
-		local draw = string.format(	ANSI_POS ,table.unpack(v))
-		print(draw)
-	end
-	print("\27[3B")]]
 	local attacker,damage,damagetype = table.unpack(t_dmg)
 	local truedmg
+	if SUPERDEBUG then print("ndef,sdef:",self.ndef,self.sdef) end
 	if damagetype == NATT then 
 		--普攻会计算闪避
 		if math.random(100+attacker.accu) <=self.miss then
@@ -46,8 +41,8 @@ function base_mt:applydmg(t_dmg)
 		end
 		self.hp = self.hp - truedmg
 	elseif damagetype == SATT then 
-		truedmg = damage - self.sdef
-		self.hp = math.min(self.hp - truedmg)
+		truedmg = math.max(damage - self.sdef,0)
+		self.hp = self.hp - truedmg
 	else 
 		print(ERROR_UNKNOW_DMGTYPE)
 		return false
@@ -84,10 +79,6 @@ function base_mt:levelup(exp)
 	return nowlvl-prelvl
 end
 
---战斗行为
-function base_mt:actshow()
-
-end
 
 --释放技能
 function base_mt:castskill(skillname,target)
@@ -109,6 +100,7 @@ function base_mt:castskill(skillname,target)
 		return false
 	end
 	self.mp = self.mp -cost 
+	--这里的目标选择不会不会实际影响技能释放对象,如果是对自己释放的技能,在技能func里面写死的。
 	if skill.passive == true then 
 		target = self
 	end
@@ -159,7 +151,7 @@ function base_mt:removeskill(skillname)
 	--正常删除技能
 	for i,v in ipairs(self.skill) do 
 		if v.name == skillname then 
-			self.skill[i] = nil 
+			table.remove(self.skill,i)
 			return true
 		end
 	end
@@ -173,6 +165,12 @@ end
 --add modifier
 function base_mt:addmodifier(modname,durationtime)
 	local modifier = skill:getmodifier(modname)
+	for i,v in ipairs(self.buffs) do 
+		if v.name == modifier.name then 
+			print(string.format(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,self.name) .."已拥有[" .. STR_COLOR_FORMAT,STR_COLOR_PURPLE,modname) .. "]效果,不能再次获得")
+			return false
+		end
+	end
 	--buff立即生效
 	for k,v in pairs(modifier) do 
 		if k ~= "name" then
@@ -212,7 +210,10 @@ function base_mt:decbufftime()
 	for i = 1,#self.bufftime do 
 		self.bufftime[i] = self.bufftime[i] -1
 	end
-	if SUPERDEBUG then 
+	if SUPERDEBUG then
+		for i =1,#self.buffs do 
+			print(self.buffs[i].name, "回合:"..self.bufftime[i])
+		end 
 		print(self.name .. ":所有buff持续时间减1")
 	end
 	return true

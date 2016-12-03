@@ -68,6 +68,7 @@ end
 --[[第二关技能]]
 --意念之光
 local mindwater ={}
+mindwater.passive =true
 mindwater.name = "意念之光"
 mindwater.cost = 5
 mindwater.desc = "控制周围光场使敌人无法命中自己,接下来的4回合额外提升5点闪避"
@@ -97,7 +98,7 @@ end
 local conlight = {}
 conlight.name = "聚合光束"
 conlight.cost = 10
-conlight.desc = "将周围空间的漫光聚合成强烈的激光束攻击敌人,造成2倍于魔法攻击力的伤害，并有20%的几率使敌人失明2回合"
+conlight.desc = "将光聚合成强烈的激光攻击敌人,造成2倍于魔法攻击力的伤害,有几率使敌人失明2回合"
 skill[conlight.name] = conlight
 conlight.func = function (caster,target)
 	local attacker = caster
@@ -112,6 +113,7 @@ end
 
 --光之耀
 local shinelight = {}
+shinelight.passive = true
 shinelight.name = "光之耀"
 shinelight.cost = 5
 shinelight.desc = "光的能量充盈着你的身体,使自己在接下来的2回合中魔法攻击力翻倍"
@@ -136,6 +138,7 @@ riftlight.func = function (caster,target)
 end
 --光之匿
 local hidelight = {}
+hidelight.passive =true
 hidelight.name = "光之匿"
 hidelight.cost = 10
 hidelight.desc = "消失在光的保护之中,在下次行动之前免疫所有伤害"
@@ -166,17 +169,19 @@ skill[throwstone.name] = throwstone
 throwstone.func = function (caster,target)
 	local attacker = caster
 	local dmgratio = math.min(100/math.abs(caster.bpos - target.bpos),4)
+	if SUPERDEBUG then print("natt:" .. caster.natt,"dmgratio:" .. dmgratio) end
 	local damage = math.floor(caster.natt*dmgratio)
 	local damagetype = NATT
 	target:applydmg({attacker,damage,damagetype})
 end
 --浮空式
-local throwstone = {}
-throwstone.name = "浮空式"
-throwstone.cost = 5
-throwstone.desc = "空力使改变自身重力,行动更加敏捷,增加自身10点战斗速度和10点闪避4回合"
-skill[throwstone.name] = throwstone
-throwstone.func = function (caster,target)
+local upground = {}
+upground.passive = true
+upground.name = "浮空式"
+upground.cost = 5
+upground.desc = "空力使改变自身重力,行动更加敏捷,增加自身10点战斗速度和10点闪避4回合"
+skill[upground.name] = upground
+upground.func = function (caster,target)
 	caster:addmodifier("浮空式",4)
 end
 --重力逆转
@@ -231,9 +236,9 @@ reflect.cost = 0
 reflect.desc = "反射所有魔法伤害"
 skill[reflect.name] = reflect
 reflect.func = function (caster,target)
-	caster.bfapplydmg = function (t_dmg)
+	caster.applydmg = function (t_dmg)
 		local attacker,damage,damagetype = table.unpack(t_dmg)
-			if damagetype == SATT then 
+			if bfdamagetype == SATT then 
 				t_dmg[2]=0
 				attacker:applydmg({caster,damage,damagetype})
 			end

@@ -7,7 +7,7 @@ require("tuning")
 SUPERDEBUG = true
 if SUPERDEBUG then 
 	COMMONDELAY = COMMONDELAY -1
-	FIRSTLEVEL = 3
+	FIRSTLEVEL = 5
 end
 require("debugfunc")
 skill = require("skill")   						--skill是全局变量,不能加local不然在base中会访问不到,要么在base中重新require.
@@ -99,11 +99,11 @@ function academy:createrole()
 	print(createword,"\n")
 	--这儿是属性分配读取
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"请输入你要分配的体质:" .. "(" ..attr .. "点属性未分配)"))
-	local con,spir,agil = 5,5,5
+	local con,spir,agil = 10,10,10
 	if not SUPERDEBUG then 	
 	 	while true do
 			local i = self:getinput()
-			if i > 0 and i < attr then
+			if i > 0 and i < attr-1 then
 				con = i
 				attr = attr - i
 				break 
@@ -114,7 +114,7 @@ function academy:createrole()
 		print(string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,"请输入你要分配的精神:".. "(" ..attr .. "点属性未分配)"))
 		while true do
 			local i = self:getinput()
-			if i > 0 and i < attr then
+			if i > 0 and i < attr-1 then
 				spir = i
 				attr = attr - i
 				agil = attr
@@ -125,13 +125,13 @@ function academy:createrole()
 		end
 	end
 	--随机获得成长,升一级获得5点属性
-	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"正在随机生成随机属性成长(智商不会超过5)……\n"))
+	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"正在随机生成随机属性成长(智商不会超过7)……\n"))
 	self:delay(COMMONDELAY)
 	local conplv,spirplv,agilplv
 	repeat
-		conplv = self:decfloor(math.random()*5)
-		spirplv = self:decfloor(math.random()*5)
-		agilplv = self:decfloor(math.random()*5)
+		conplv = self:decfloor(math.random()*6)+1
+		spirplv = self:decfloor(math.random()*6)+1
+		agilplv = self:decfloor(math.random()*6)+1
 	until conplv+spirplv+agilplv <= MAX_ATTR_GAIN
 	
 	--指定角色名
@@ -208,7 +208,7 @@ function academy:createrole()
 	self.role = self:unitborn(self.roleattr)
 	--生成角色时增加普通攻击
 	self.role:addskill(SKILL_NATT_NAME)
-	if SUPERDEBUG then 	self.role:addskill("意念之光") end 
+	if SUPERDEBUG then 	self.role:addskill("意念之光");self.role:addskill("强力击");self.role:addskill("光之匿") end 
 	print(ANSI_RESET_CLEAR)
 	return self:levelstart(FIRSTLEVEL)
 end 
@@ -345,7 +345,7 @@ function academy:dealmodifier()
 	while true do 
 		local len_t = #self.role.bufftime
 		for i = 1,#self.role.buffs,1 do
-			if bufftime == -1 then 
+			if self.role.bufftime[i] == -1 then 
 				local remodid = i
 				for k,v in pairs(self.role.buffs[remodid]) do
 					if k ~= "name" then 
@@ -370,7 +370,7 @@ function academy:dealmodifier()
 	while true do 
 		local len_t = #self.monster.bufftime
 		for i = 1,#self.monster.buffs,1 do
-			if bufftime == -1 then 
+			if self.monster.bufftime[i] == -1 then 
 				local remodid = i
 				for k,v in pairs(self.monster.buffs[remodid]) do
 					if k ~= "name" then 
@@ -401,9 +401,9 @@ function academy:fight()
 		return FIGHT_RESULT_WIN
 	end
 	print(ANSI_RESET_CLEAR)
-	self:dealmodifier()				    --处理buff函数
 	self.battlerounds = self.battlerounds + 1
 	print(string.format(STR_COLOR_FORMAT,STR_COLOR_PURPLE,"第" .. self.battlerounds .."回合"))
+	self:dealmodifier()				    --处理buff函数
 	--回复魔法值计算
 	local unit= self.role
 	if math.random(10000)/100 <= 2 * math.floor(unit.spir+(unit.level-1)*unit.spirplv) then
@@ -415,7 +415,7 @@ function academy:fight()
 	--如果是真，则让玩家采取行动，否则怪物AI
 	local battleturn = fight:battlespeed(self.role,self.monster)
 	if battleturn == true  then
-    	self.rolerounds = self.rolerounds+1
+    	self.rolerounds = self.rolerounds+1 					--玩家行动回合+1
     	print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"请选择下一步行动:"))
 		self:actlist()
 		local actionid 
@@ -428,7 +428,7 @@ function academy:fight()
 		self.role:castskill(self.role.skill[actionid].name,self.monster)
 		self.role:decbufftime()			--buff回合-1
 	else
-		self.monsterrounds = self.monsterrounds+1
+		self.monsterrounds = self.monsterrounds+1 				--怪物行动回合+1
 		local delaytime = 1+math.random()*2
 		local thinkword = string.format(STR_COLOR_FORMAT,STR_COLOR_GREEN,self.monster.name .. "正在考虑下一步行动……")
 		print(thinkword)
@@ -502,12 +502,13 @@ function academy:levelpass(curlevelid)
 		repeat
 			local str = ""
 			for i,v in ipairs(realloot) do
-				str = str .. SERIAL[i] .. utf8.char(32) .. v .. "\n"
+				str = str .. SERIAL[i] .. utf8.char(32) .. v ..":".. skill[v].desc .. "\n"
 			end
 			print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,"\n\n幸运发生了,你有未学习的技能:"))
 			print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,str))
 			if #self.role.skill == MAX_SKILL_NUM then 
 				print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,"已经有6个技能,请选择一个来忘记!"))
+				self:actlist()
 				local forgetid 
 				repeat
 					if forgetid then 
@@ -515,6 +516,7 @@ function academy:levelpass(curlevelid)
 					end
 					forgetid = self:getinput()
 				until self.role.skill[forgetid]
+				print(string.format(STR_COLOR_FORMAT,STR_COLOR_DGREEN,"你忘记了技能" .. self.role.skill[forgetid].name))	
 				self.role:removeskill(self.role.skill[forgetid].name)
 			else 
 				print(string.format(STR_COLOR_FORMAT,STR_COLOR_YELLOW,"请输入你想要学习的技能序号(错误的输入会随机放弃某个技能):"))
