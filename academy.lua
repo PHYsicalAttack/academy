@@ -4,7 +4,7 @@ math.randomseed(os.time())
 local pwd = string.sub(io.popen("pwd"):read("*a"),1,-2) 
 package.path = package.path ..";" .. pwd .. "/" .."?.lua"
 require("tuning")
-SUPERDEBUG = true
+SUPERDEBUG = false
 if SUPERDEBUG then 
 	COMMONDELAY = COMMONDELAY -1
 	FIRSTLEVEL = 5
