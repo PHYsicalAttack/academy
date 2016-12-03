@@ -580,7 +580,7 @@ function academy:startgame()
 	print(ANSI_RESET_CLEAR)
 	print(WELCOME)
 	self.level = self:getconfig("academy")
-	--self:delay(5)
+	self:delay(3*COMMONDELAY)
 	self:createrole()
 end
 
